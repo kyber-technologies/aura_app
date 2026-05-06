@@ -1,0 +1,18 @@
+{
+  "@@locale": "en",
+  "userid": "User Identifier",
+  "useridDescription": "Your unique user identifier",
+  "useridInvalid": "Please enter a valid user identifier",
+  "password": "password",
+  "passwordDescription": "Your super-secret password",
+  "passwordInvalid": "Please enter a valid password",
+  "login": "Login",
+  "unexpectedError": "Unexpected error",
+  "unauthorizedLoginError": "Credentials are invalid. Please try again.",
+  "settings": "Settings",
+  "logout": "Log Out",
+  "confirmLogout": "Log out of Aura?",
+  "about": "About",
+  "yes": "Yes",
+  "no": "No"
+}
