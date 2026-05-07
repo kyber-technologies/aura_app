@@ -29,8 +29,8 @@ String displayRole(UserRole role) {
   switch (role) {
     case UserRole.USER_ROLE_USER_UNSPECIFIED:
       return 'User';
-    case UserRole.USER_ROLE_SUPERVISOR:
-      return 'Supervisor';
+    case UserRole.USER_ROLE_MODERATOR:
+      return 'Moderator';
     case UserRole.USER_ROLE_ADMIN:
       return 'Admin';
     default:
