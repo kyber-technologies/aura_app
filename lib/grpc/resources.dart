@@ -2,7 +2,6 @@ import 'dart:convert';
 
 import 'package:aura_app/grpc/auth.dart';
 import 'package:aura_app/grpc/client.dart';
-import 'package:aura_app/grpc/exception.dart';
 import 'package:aura_app/storage.dart';
 import 'package:aura_dart/aura_dart.dart';
 import 'package:flutter/foundation.dart';
@@ -29,28 +28,13 @@ class ResourceManager {
   }
 
   Future<Resource> fetch(ResourceId id) async {
-    final GetResourceMetaResponse metaRequest = await _client
-        .resourceService()
-        .getResourceMeta(
-          GetResourceMetaRequest(resourceId: id),
-          options: _auth.buildOptions(),
-        );
-
-    if (metaRequest.hasError()) {
-      throw ServiceException(metaRequest.error);
-    }
-
-    final Timestamp timestamp = metaRequest.meta.timestamp;
     final String key = buildKey(id);
     Resource? resource = await _read(key);
 
-    if (resource != null && resource.meta.timestamp == timestamp) {
-      return resource;
+    if (resource == null) {
+      resource = await _request(id);
+      await _write(key, resource);
     }
-
-    resource = await _request(id);
-
-    await _write(key, resource);
 
     return resource;
   }

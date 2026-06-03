@@ -15,7 +15,29 @@ class AppLocalizationsEn extends AppLocalizations {
   String get useridDescription => 'Your unique user identifier';
 
   @override
-  String get useridInvalid => 'Please enter a valid user identifier';
+  String get useridInvalid =>
+      'Please enter a valid user identifier with a minimum length of 3 characters';
+
+  @override
+  String get useridNotUnique => 'User Id is already taken';
+
+  @override
+  String get username => 'Username';
+
+  @override
+  String get usernameDescription => 'Your display username';
+
+  @override
+  String get usernameInvalid => 'Please enter a valid username';
+
+  @override
+  String get email => 'Email';
+
+  @override
+  String get emailDescription => 'Your email address';
+
+  @override
+  String get emailInvalid => 'Please enter a valid email address';
 
   @override
   String get password => 'password';
@@ -24,10 +46,25 @@ class AppLocalizationsEn extends AppLocalizations {
   String get passwordDescription => 'Your super-secret password';
 
   @override
-  String get passwordInvalid => 'Please enter a valid password';
+  String get passwordInvalid =>
+      'Please enter a valid password with a minimum length of 6 characters';
 
   @override
   String get login => 'Login';
+
+  @override
+  String get signup => 'Signup';
+
+  @override
+  String get verifyEmail => 'Verify your Email';
+
+  @override
+  String verifyEmailBody(Object email) {
+    return 'We\'ve sent a verification email to $email';
+  }
+
+  @override
+  String get emailTokenLabel => 'Your verification code';
 
   @override
   String get unexpectedError => 'Unexpected error';
@@ -53,4 +90,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get no => 'No';
+
+  @override
+  String get submit => 'Submit';
 }

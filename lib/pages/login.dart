@@ -35,132 +35,137 @@ class LoginPage extends HookConsumerWidget {
         (BuildContext context, WidgetRef ref, AuthService auth) => Center(
           child: sizer.box(
             w: 325,
-            h: 150,
+            h: 175,
             child: Card(
               child: sizer.padding(
                 horizontal: 35,
                 child: Form(
                   key: formKey.value,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      const Text('Login').headline(context),
-                      sizer.padding(bottom: 10),
-                      TextFormField(
-                        controller: useridController,
-                        decoration: InputDecoration(
-                          icon: const Icon(Icons.person),
-                          labelText: context.l10n.userid,
-                          helperText: context.l10n.useridDescription,
-                        ),
-                        validator: (String? input) {
-                          if (input == null || input.isEmpty) {
-                            return context.l10n.useridInvalid;
-                          }
-
-                          return null;
-                        },
-                      ),
-                      sizer.padding(bottom: 10),
-                      TextFormField(
-                        controller: passwordController,
-                        decoration: InputDecoration(
-                          icon: const Icon(Icons.security),
-                          labelText: context.l10n.password,
-                          helperText: context.l10n.passwordDescription,
-                        ),
-                        onFieldSubmitted: (String input) async {
-                          passwordController.text = input;
-
-                          if (formKey.value.currentState!.validate()) {
-                            try {
-                              result.value = null;
-
-                              await auth.login(
-                                userId: useridController.text,
-                                password: passwordController.text,
-                              );
-
-                              if (context.mounted) {
-                                context.goNamed(homeRoute.name);
-                              }
-                            } on Exception catch (exception) {
-                              logger.e(exception);
-
-                              result.value = exception;
+                  child: SingleChildScrollView(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        sizer.box(h: 20),
+                        Text(context.l10n.login).headline(context),
+                        TextFormField(
+                          controller: useridController,
+                          decoration: InputDecoration(
+                            icon: const Icon(Icons.person),
+                            labelText: context.l10n.userid,
+                            helperText: context.l10n.useridDescription,
+                          ),
+                          validator: (String? input) {
+                            if (input == null || input.isEmpty) {
+                              return context.l10n.useridInvalid;
                             }
-                          }
-                        },
-                        validator: (String? input) {
-                          if (input == null || input.isEmpty) {
-                            return context.l10n.passwordInvalid;
-                          }
 
-                          return null;
-                        },
-                      ),
-                      sizer.padding(bottom: 10),
-                      FilledButton.icon(
-                        onPressed: () async {
-                          if (formKey.value.currentState!.validate()) {
-                            try {
-                              result.value = null;
+                            return null;
+                          },
+                        ),
+                        TextFormField(
+                          controller: passwordController,
+                          decoration: InputDecoration(
+                            icon: const Icon(Icons.security),
+                            labelText: context.l10n.password,
+                            helperText: context.l10n.passwordDescription,
+                          ),
+                          onFieldSubmitted: (String input) async {
+                            passwordController.text = input;
 
-                              await auth.login(
-                                userId: useridController.text,
-                                password: passwordController.text,
-                              );
+                            if (formKey.value.currentState!.validate()) {
+                              try {
+                                result.value = null;
 
-                              if (context.mounted) {
-                                context.goNamed(homeRoute.name);
+                                await auth.login(
+                                  userId: useridController.text,
+                                  password: passwordController.text,
+                                );
+
+                                if (context.mounted) {
+                                  context.goNamed(homeRoute.name);
+                                }
+                              } on Exception catch (exception) {
+                                logger.e(exception);
+
+                                result.value = exception;
                               }
-                            } on Exception catch (exception) {
-                              logger.e(exception);
-
-                              result.value = exception;
                             }
-                          }
-                        },
-                        icon: const Icon(Icons.login),
-                        label: Text(context.l10n.login),
-                      ),
-                      sizer.padding(bottom: 10),
-                      Builder(
-                        builder: (BuildContext context) {
-                          if (result.value == null) {
-                            return const Text('');
-                          } else {
-                            final Exception serviceError = result.value!;
+                          },
+                          validator: (String? input) {
+                            if (input == null || input.isEmpty) {
+                              return context.l10n.passwordInvalid;
+                            }
 
-                            if (serviceError is ServiceException) {
-                              final ServiceException exception =
-                                  result.value! as ServiceException;
+                            return null;
+                          },
+                        ),
+                        FilledButton.icon(
+                          onPressed: () async {
+                            if (formKey.value.currentState!.validate()) {
+                              try {
+                                result.value = null;
 
-                              if (exception.error.code ==
-                                  ErrorCode.ERROR_CODE_UNAUTHORIZED) {
-                                return Text(
-                                  context.l10n.unauthorizedLoginError,
-                                  textAlign: TextAlign.center,
-                                ).bodyLarge(context).error(context);
+                                await auth.login(
+                                  userId: useridController.text,
+                                  password: passwordController.text,
+                                );
+
+                                if (context.mounted) {
+                                  context.goNamed(homeRoute.name);
+                                }
+                              } on Exception catch (exception) {
+                                logger.e(exception);
+
+                                result.value = exception;
+                              }
+                            }
+                          },
+                          icon: const Icon(Icons.login),
+                          label: Text(context.l10n.login),
+                        ),
+                        Builder(
+                          builder: (BuildContext context) {
+                            if (result.value == null) {
+                              return const Text('');
+                            } else {
+                              final Exception serviceError = result.value!;
+
+                              if (serviceError is ServiceException) {
+                                final ServiceException exception =
+                                    result.value! as ServiceException;
+
+                                if (exception.error.code ==
+                                    ErrorCode.ERROR_CODE_UNAUTHORIZED) {
+                                  return Text(
+                                    context.l10n.unauthorizedLoginError,
+                                    textAlign: TextAlign.center,
+                                  ).bodyLarge(context).error(context);
+                                } else {
+                                  return Text(
+                                    '${context.l10n.unexpectedError} - '
+                                    '${serviceError.error.message} '
+                                    '(${serviceError.error.code})',
+                                    textAlign: TextAlign.center,
+                                  ).bodyLarge(context).error(context);
+                                }
                               } else {
                                 return Text(
                                   '${context.l10n.unexpectedError} - '
-                                  '${serviceError.error.message} '
-                                  '(${serviceError.error.code})',
+                                  '$serviceError',
                                   textAlign: TextAlign.center,
                                 ).bodyLarge(context).error(context);
                               }
-                            } else {
-                              return Text(
-                                '${context.l10n.unexpectedError} - '
-                                '$serviceError',
-                                textAlign: TextAlign.center,
-                              ).bodyLarge(context).error(context);
                             }
-                          }
-                        },
-                      ),
-                    ],
+                          },
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            context.goNamed(signupRoute.name);
+                          },
+                          child: Text(context.l10n.signup),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),

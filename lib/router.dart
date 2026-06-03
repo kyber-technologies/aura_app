@@ -4,6 +4,7 @@ import 'package:aura_app/pages/chat.dart';
 import 'package:aura_app/pages/home.dart';
 import 'package:aura_app/pages/login.dart';
 import 'package:aura_app/pages/profile/profile.dart';
+import 'package:aura_app/pages/signup.dart';
 import 'package:aura_app/storage.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -33,6 +34,12 @@ const RouteDescriptor loginRoute = RouteDescriptor(
   page: LoginPage(),
 );
 
+const RouteDescriptor signupRoute = RouteDescriptor(
+  path: '/signup',
+  name: 'signup',
+  page: SignupPage(),
+);
+
 final FutureProvider<GoRouter> routerProvider = FutureProvider<GoRouter>((
   Ref ref,
 ) async {
@@ -49,6 +56,7 @@ final FutureProvider<GoRouter> routerProvider = FutureProvider<GoRouter>((
       chatRoute.toRoute(animations, auth),
       profileRoute.toRoute(animations, auth),
       loginRoute.toRoute(animations, null),
+      signupRoute.toRoute(animations, null),
     ],
     initialLocation: '/',
   );

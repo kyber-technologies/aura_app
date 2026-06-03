@@ -109,8 +109,50 @@ abstract class AppLocalizations {
   /// No description provided for @useridInvalid.
   ///
   /// In en, this message translates to:
-  /// **'Please enter a valid user identifier'**
+  /// **'Please enter a valid user identifier with a minimum length of 3 characters'**
   String get useridInvalid;
+
+  /// No description provided for @useridNotUnique.
+  ///
+  /// In en, this message translates to:
+  /// **'User Id is already taken'**
+  String get useridNotUnique;
+
+  /// No description provided for @username.
+  ///
+  /// In en, this message translates to:
+  /// **'Username'**
+  String get username;
+
+  /// No description provided for @usernameDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Your display username'**
+  String get usernameDescription;
+
+  /// No description provided for @usernameInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a valid username'**
+  String get usernameInvalid;
+
+  /// No description provided for @email.
+  ///
+  /// In en, this message translates to:
+  /// **'Email'**
+  String get email;
+
+  /// No description provided for @emailDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Your email address'**
+  String get emailDescription;
+
+  /// No description provided for @emailInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a valid email address'**
+  String get emailInvalid;
 
   /// No description provided for @password.
   ///
@@ -127,7 +169,7 @@ abstract class AppLocalizations {
   /// No description provided for @passwordInvalid.
   ///
   /// In en, this message translates to:
-  /// **'Please enter a valid password'**
+  /// **'Please enter a valid password with a minimum length of 6 characters'**
   String get passwordInvalid;
 
   /// No description provided for @login.
@@ -135,6 +177,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Login'**
   String get login;
+
+  /// No description provided for @signup.
+  ///
+  /// In en, this message translates to:
+  /// **'Signup'**
+  String get signup;
+
+  /// No description provided for @verifyEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify your Email'**
+  String get verifyEmail;
+
+  /// No description provided for @verifyEmailBody.
+  ///
+  /// In en, this message translates to:
+  /// **'We\'ve sent a verification email to {email}'**
+  String verifyEmailBody(Object email);
+
+  /// No description provided for @emailTokenLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Your verification code'**
+  String get emailTokenLabel;
 
   /// No description provided for @unexpectedError.
   ///
@@ -183,6 +249,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No'**
   String get no;
+
+  /// No description provided for @submit.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit'**
+  String get submit;
 }
 
 class _AppLocalizationsDelegate

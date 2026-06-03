@@ -1,8 +1,8 @@
 import 'package:aura_dart/chat/v1/chat.pbgrpc.dart';
 import 'package:aura_dart/resource/v1/resource.pbgrpc.dart';
 import 'package:aura_dart/user/v1/user.pbgrpc.dart';
-import 'package:grpc/grpc.dart';
 import 'package:grpc/grpc_or_grpcweb.dart';
+import 'package:grpc/service_api.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 const String host = String.fromEnvironment(

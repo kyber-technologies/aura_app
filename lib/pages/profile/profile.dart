@@ -4,7 +4,6 @@ import 'package:aura_app/grpc/auth.dart';
 import 'package:aura_app/info.dart';
 import 'package:aura_app/router.dart';
 import 'package:aura_app/sizer.dart';
-import 'package:aura_app/utils.dart';
 import 'package:aura_app/widgets/avatar.dart';
 import 'package:aura_app/widgets/loader.dart';
 import 'package:aura_app/widgets/navbar.dart';
@@ -36,21 +35,13 @@ class ProfilePage extends HookConsumerWidget {
                     width: sizer.sp(25),
                     height: sizer.sp(25),
                   ),
+                  Text(
+                    auth.profile.username,
+                  ).headlineSmall(context).selectable(),
                   sizer.box(h: 5),
-                  Row(
-                    spacing: 10,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      Text('@${auth.profile.userId}')
-                          .headlineSmall(context)
-                          .copyWithStyle(fontWeight: FontWeight.w300),
-                      const Text(' // ').headlineSmall(context),
-                      Text(auth.profile.username)
-                          .headlineSmall(context)
-                          .copyWithStyle(fontWeight: FontWeight.w700),
-                    ],
-                  ),
-                  Text(displayRole(auth.profile.role)).headlineSmall(context),
+                  Text(
+                    '@${auth.profile.userId}',
+                  ).headlineSmall(context).selectable(),
                   sizer.box(h: 5),
                   FilledButton.icon(
                     onPressed: () {},

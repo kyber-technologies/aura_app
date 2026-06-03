@@ -247,3 +247,7 @@ extension TextExt on Text {
     );
   }
 }
+
+extension Selectable on Widget {
+  SelectionArea selectable() => SelectionArea(child: this);
+}

@@ -37,3 +37,13 @@ String displayRole(UserRole role) {
       throw Exception('Unknown role: $role');
   }
 }
+
+bool isValidEmail(String email) {
+  final RegExp emailRegex = RegExp(
+    r"^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+"
+    '@[a-zA-Z0-9-]+'
+    r'(?:\.[a-zA-Z0-9-]+)*$',
+  );
+
+  return emailRegex.hasMatch(email);
+}
