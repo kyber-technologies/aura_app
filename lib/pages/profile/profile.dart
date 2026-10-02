@@ -31,16 +31,14 @@ class ProfilePage extends HookConsumerWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
                   Avatar(
-                    auth.profile.userId,
+                    auth.user.userId,
                     width: sizer.sp(25),
                     height: sizer.sp(25),
                   ),
-                  Text(
-                    auth.profile.username,
-                  ).headlineSmall(context).selectable(),
+                  Text(auth.user.username).headlineSmall(context).selectable(),
                   sizer.box(h: 5),
                   Text(
-                    '@${auth.profile.userId}',
+                    '@${auth.user.userId}',
                   ).headlineSmall(context).selectable(),
                   sizer.box(h: 5),
                   FilledButton.icon(

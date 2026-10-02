@@ -251,3 +251,7 @@ extension TextExt on Text {
 extension Selectable on Widget {
   SelectionArea selectable() => SelectionArea(child: this);
 }
+
+extension FutureExt<T> on Future<T> {
+  Future<(T, U)> join<U>(Future<U> fut) async => (await this, await fut);
+}

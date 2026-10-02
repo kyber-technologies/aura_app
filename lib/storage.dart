@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:aura_app/chat.dart';
 import 'package:aura_app/grpc/auth.dart';
 import 'package:aura_app/info.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -17,7 +18,7 @@ class Storage {
       description: 'Aura Secure Storage',
     ),
     aOptions: AndroidOptions(
-      sharedPreferencesName: packageInfo.appName,
+      storageNamespace: packageInfo.appName,
       preferencesKeyPrefix: '${packageInfo.packageName}.',
     ),
     webOptions: WebOptions(
@@ -31,13 +32,14 @@ class Storage {
     ),
   );
 
-  Settings settings = Settings.defaultValue();
+  late Settings settings;
+  late ChatStorage chatStorage;
   AuthState? auth;
 
   static Future<Storage> load() async {
     final Storage storage = Storage();
 
-    // Load settings
+    // Load Settings
     {
       final String? json = await storage.storage.read(key: 'settings');
 
@@ -55,6 +57,21 @@ class Storage {
       }
     }
 
+    // Load Chats
+    {
+      final String? json = await storage.storage.read(key: 'chats');
+
+      if (json == null) {
+        final ChatStorage defaultValue = ChatStorage.defaultValue();
+
+        await storage.storage.write(key: 'chats', value: defaultValue.toJson());
+
+        storage.chatStorage = defaultValue;
+      } else {
+        storage.chatStorage = ChatStorage.fromJson(json);
+      }
+    }
+
     // Load Auth State
     {
       final String? json = await storage.storage.read(key: 'auth');
@@ -68,10 +85,13 @@ class Storage {
   }
 
   Future<void> save() async {
-    // Save settings
+    // Save Settings
     await storage.write(key: 'settings', value: settings.toJson());
 
-    // Save auth
+    // Save Chats
+    await storage.write(key: 'chats', value: chatStorage.toJson());
+
+    // Save Auth State
     if (auth != null) {
       await storage.write(key: 'auth', value: auth!.toJson());
     } else {
@@ -80,18 +100,53 @@ class Storage {
   }
 }
 
+class ChatStorage {
+  Map<String, Chat> chats;
+
+  static ChatStorage defaultValue() => ChatStorage(<String, Chat>{});
+
+  ChatStorage(this.chats);
+
+  static ChatStorage fromJson(String json) {
+    final Map<String, dynamic> map = jsonDecode(json) as Map<String, dynamic>;
+
+    final Iterable<MapEntry<String, Chat>> chats = map.entries.map(
+      (MapEntry<String, dynamic> entry) => MapEntry<String, Chat>(
+        entry.key,
+        Chat.fromJson(entry.value as String),
+      ),
+    );
+
+    return ChatStorage(Map<String, Chat>.fromEntries(chats));
+  }
+
+  String toJson() {
+    final Map<String, String> map = Map<String, String>.fromEntries(
+      chats.entries.map(
+        (MapEntry<String, Chat> entry) =>
+            MapEntry<String, String>(entry.key, entry.value.toJson()),
+      ),
+    );
+
+    return jsonEncode(map);
+  }
+}
+
 class Settings {
-  late bool darkMode;
-  late bool animations;
+  bool darkMode;
+  bool animations;
 
   static Settings defaultValue() => Settings(darkMode: false, animations: true);
 
   Settings({required this.darkMode, required this.animations});
 
-  Settings.fromJson(String json) {
+  static Settings fromJson(String json) {
     final Map<String, dynamic> map = jsonDecode(json) as Map<String, dynamic>;
-    darkMode = bool.parse(map['darkMode']! as String);
-    animations = bool.parse(map['animations']! as String);
+
+    return Settings(
+      darkMode: bool.parse(map['darkMode']! as String),
+      animations: bool.parse(map['animations']! as String),
+    );
   }
 
   String toJson() => jsonEncode(<String, String>{

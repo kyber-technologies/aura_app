@@ -13,7 +13,7 @@ class Navbar extends HookConsumerWidget {
     final int selected = useMemoized(() {
       final String routeName = GoRouterState.of(context).name ?? '';
 
-      if (routeName == homeRoute.name) {
+      if (routeName == feedRoute.name) {
         return 0;
       } else if (routeName == chatRoute.name) {
         return 1;
@@ -28,9 +28,9 @@ class Navbar extends HookConsumerWidget {
       selectedIndex: selected,
       destinations: const <NavigationDestination>[
         NavigationDestination(
-          icon: Icon(Icons.home),
-          label: 'Home',
-          tooltip: 'Go to Home',
+          icon: Icon(Icons.signpost),
+          label: 'Feed',
+          tooltip: 'Go to your Feed',
         ),
         NavigationDestination(
           icon: Icon(Icons.chat),
@@ -47,7 +47,7 @@ class Navbar extends HookConsumerWidget {
       onDestinationSelected: (int index) {
         switch (index) {
           case 0:
-            context.goNamed(homeRoute.name);
+            context.goNamed(feedRoute.name);
           case 1:
             context.goNamed(chatRoute.name);
           case 2:

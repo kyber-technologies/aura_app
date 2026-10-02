@@ -1,4 +1,4 @@
-package com.example.aura_app
+package de.drafteddev.aura_app
 
 import io.flutter.embedding.android.FlutterActivity
 

@@ -1,4 +1,4 @@
-import 'package:aura_dart/aura_dart.dart';
+import 'package:aura_dart/user.dart';
 
 String joinPath(String base, String part) {
   String basePath = base;

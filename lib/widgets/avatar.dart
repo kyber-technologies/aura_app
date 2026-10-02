@@ -2,9 +2,10 @@ import 'package:aura_app/grpc/resources.dart';
 import 'package:aura_app/sizer.dart';
 import 'package:aura_app/theme.dart';
 import 'package:aura_app/widgets/loader.dart';
-import 'package:aura_dart/resource/v1/resource.pb.dart';
+import 'package:aura_dart/resource.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:protobuf/well_known_types/google/protobuf/empty.pb.dart';
 
 class Avatar extends HookConsumerWidget {
   final String userId;
@@ -29,7 +30,10 @@ class Avatar extends HookConsumerWidget {
         .read(
           resourceProvider.selectAsync(
             (ResourceManager manager) async => await manager.fetch(
-              ResourceId(namespace: 'user.$userId', key: 'avatar.png'),
+              ResourceId(
+                namespace: ResourceNamespace(userIcon: Empty()),
+                key: userId,
+              ),
             ),
           ),
         )

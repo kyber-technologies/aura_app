@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:aura_app/grpc/client.dart';
 import 'package:aura_app/grpc/exception.dart';
 import 'package:aura_app/storage.dart';
-import 'package:aura_dart/aura_dart.dart';
+import 'package:aura_dart/user.dart';
 import 'package:dart_jsonwebtoken/dart_jsonwebtoken.dart';
 import 'package:grpc/grpc.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -25,19 +25,19 @@ class AuthService {
     return state!.token;
   }
 
-  UserProfile get profile {
+  User get user {
     if (state == null) {
       throw Exception('User not authenticated');
     }
 
-    return state!.profile;
+    return state!.user;
   }
 
   AuthService(this._client, this._storage, this.state);
 
   static Future<AuthService> init(Ref ref) async {
     final Storage storage = await ref.read(storageProvider.future);
-    final AuraClient client = ref.read(auraClientProvider);
+    final AuraClient client = await ref.read(auraClientProvider.future);
 
     final AuthService authService = AuthService(client, storage, storage.auth);
 
@@ -60,25 +60,14 @@ class AuthService {
   }
 
   Future<void> login({required String userId, required String password}) async {
-    final AuthUserResponse response = await _client.userService().authUser(
-      AuthUserRequest(userId: userId, password: password),
+    final AuthResponse response = await _client.userService.auth(
+      AuthRequest(userId: userId, password: password),
     );
 
     if (response.hasError()) {
       throw ServiceException(response.error);
     } else {
-      final GetUserResponse userResponse = await _client.userService().getUser(
-        GetUserRequest(userId: userId),
-        options: CallOptions(
-          metadata: <String, String>{'Authorization': response.token},
-        ),
-      );
-
-      if (userResponse.hasError()) {
-        throw ServiceException(userResponse.error);
-      }
-
-      state = AuthState(token: response.token, profile: userResponse.user);
+      state = AuthState(token: response.token, user: response.user);
 
       _storage.auth = state;
       await _storage.save();
@@ -92,25 +81,41 @@ class AuthService {
     await _storage.save();
   }
 
+  Future<void> refresh() async {
+    final AuthResponse response = await _client.userService.auth(
+      AuthRequest(),
+      options: buildOptions(),
+    );
+
+    if (response.hasError()) {
+      throw ServiceException(response.error);
+    } else {
+      state = AuthState(token: response.token, user: response.user);
+      _storage.auth = state;
+      await _storage.save();
+    }
+  }
+
   CallOptions? buildOptions() => state == null
       ? null
       : CallOptions(metadata: <String, String>{'Authorization': state!.token});
 }
 
 class AuthState {
-  late String token;
-  late UserProfile profile;
+  String token;
+  User user;
 
-  AuthState({required this.token, required this.profile});
+  AuthState({required this.token, required this.user});
 
-  AuthState.fromJson(String json) {
+  static AuthState fromJson(String json) {
     final Map<String, dynamic> map = jsonDecode(json) as Map<String, dynamic>;
-    token = map['token'] as String;
-    profile = UserProfile.fromJson(map['profile'] as String);
+
+    return AuthState(
+      token: map['token'] as String,
+      user: User.fromJson(map['user'] as String),
+    );
   }
 
-  String toJson() => jsonEncode(<String, String>{
-    'token': token,
-    'profile': profile.writeToJson(),
-  });
+  String toJson() =>
+      jsonEncode(<String, String>{'token': token, 'user': user.writeToJson()});
 }

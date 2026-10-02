@@ -8,7 +8,8 @@ import 'package:aura_app/sizer.dart';
 import 'package:aura_app/utils.dart';
 import 'package:aura_app/widgets/loader.dart';
 import 'package:aura_app/widgets/navbar.dart';
-import 'package:aura_dart/aura_dart.dart';
+import 'package:aura_dart/common.dart';
+import 'package:aura_dart/user.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
@@ -22,7 +23,7 @@ class SignupPage extends HookConsumerWidget {
     final Sizer sizer = useSizer(context);
     final ValueNotifier<GlobalKey<FormState>> formKey = useState(GlobalKey());
     final Future<AuthService> authFut = ref.watch(authProvider.future);
-    final AuraClient client = ref.watch(auraClientProvider);
+    final Future<AuraClient> clientFut = ref.watch(auraClientProvider.future);
 
     final TextEditingController useridController = useTextEditingController
         .fromValue(TextEditingValue.empty);
@@ -40,9 +41,14 @@ class SignupPage extends HookConsumerWidget {
 
     return Scaffold(
       bottomNavigationBar: const Navbar(),
-      body: Loader<AuthService>(
-        authFut,
-        (BuildContext context, WidgetRef ref, AuthService auth) => Center(
+      body: Loader<(AuthService, AuraClient)>(authFut.join(clientFut), (
+        BuildContext context,
+        WidgetRef ref,
+        (AuthService, AuraClient) loaderResult,
+      ) {
+        final (AuthService auth, AuraClient client) = loaderResult;
+
+        return Center(
           child: sizer.box(
             w: 325,
             h: 150,
@@ -126,7 +132,7 @@ class SignupPage extends HookConsumerWidget {
                                 );
 
                                 if (context.mounted) {
-                                  context.goNamed(homeRoute.name);
+                                  context.goNamed(feedRoute.name);
                                 }
                               } on Exception catch (exception) {
                                 logger.e(exception);
@@ -151,21 +157,36 @@ class SignupPage extends HookConsumerWidget {
                               try {
                                 result.value = null;
 
-                                final UserExistsResponse userExistsResponse =
-                                    await client.userService().userExists(
-                                      UserExistsRequest(
+                                final ExistsResponse userExistsResponse =
+                                    await client.userService.exists(
+                                      ExistsRequest(
                                         userId: useridController.text,
                                       ),
                                     );
 
                                 if (userExistsResponse.hasError()) {
+                                  switch (userExistsResponse.error
+                                      .whichType()) {
+                                    case ServiceErrorType.notFound:
+                                      break;
+                                    default:
+                                      throw ServiceException(
+                                        userExistsResponse.error,
+                                      );
+                                  }
+                                } else {
                                   throw ServiceException(
-                                    userExistsResponse.error,
+                                    ServiceError(
+                                      alreadyExists: AlreadyExistsError(),
+                                      message: context.mounted
+                                          ? context.l10n.useridNotUnique
+                                          : '',
+                                    ),
                                   );
                                 }
 
                                 final VerifyEmailResponse verifyEmailResponse =
-                                    await client.userService().verifyEmail(
+                                    await client.userService.verifyEmail(
                                       VerifyEmailRequest(
                                         email: emailController.text,
                                       ),
@@ -219,9 +240,9 @@ class SignupPage extends HookConsumerWidget {
                                 }
 
                                 if (token != null) {
-                                  final CreateUserResponse createUserResponse =
-                                      await client.userService().createUser(
-                                        CreateUserRequest(
+                                  final CreateResponse createUserResponse =
+                                      await client.userService.create(
+                                        CreateRequest(
                                           userId: useridController.text,
                                           password: passwordController.text,
                                           email: emailController.text,
@@ -241,7 +262,7 @@ class SignupPage extends HookConsumerWidget {
                                   );
 
                                   if (context.mounted) {
-                                    context.goNamed(homeRoute.name);
+                                    context.goNamed(feedRoute.name);
                                   }
                                 }
                               } on Exception catch (exception) {
@@ -265,14 +286,14 @@ class SignupPage extends HookConsumerWidget {
                                 final ServiceException exception =
                                     result.value! as ServiceException;
 
-                                switch (exception.error.code) {
-                                  case ErrorCode.ERROR_CODE_UNAUTHORIZED:
+                                switch (exception.error.whichType()) {
+                                  case ServiceErrorType.unauthorized:
                                     return Text(
                                       context.l10n.unauthorizedLoginError,
                                       textAlign: TextAlign.center,
                                     ).bodyLarge(context).error(context);
 
-                                  case ErrorCode.ERROR_CODE_ALREADY_EXISTS:
+                                  case ServiceErrorType.alreadyExists:
                                     return Text(
                                       context.l10n.useridNotUnique,
                                       textAlign: TextAlign.center,
@@ -309,8 +330,8 @@ class SignupPage extends HookConsumerWidget {
               ),
             ),
           ),
-        ),
-      ),
+        );
+      }),
     );
   }
 }

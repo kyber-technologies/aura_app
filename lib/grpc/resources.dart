@@ -3,9 +3,10 @@ import 'dart:convert';
 import 'package:aura_app/grpc/auth.dart';
 import 'package:aura_app/grpc/client.dart';
 import 'package:aura_app/storage.dart';
-import 'package:aura_dart/aura_dart.dart';
+import 'package:aura_dart/resource.dart';
 import 'package:flutter/foundation.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:protobuf/well_known_types/google/protobuf/empty.pb.dart';
 
 final FutureProvider<ResourceManager> resourceProvider =
     FutureProvider<ResourceManager>(
@@ -21,7 +22,7 @@ class ResourceManager {
 
   static Future<ResourceManager> init(Ref ref) async {
     final Storage storage = await ref.read(storageProvider.future);
-    final AuraClient client = ref.read(auraClientProvider);
+    final AuraClient client = await ref.read(auraClientProvider.future);
     final AuthService auth = await ref.watch(authProvider.future);
 
     return ResourceManager(storage, client, auth);
@@ -54,11 +55,11 @@ class ResourceManager {
   }
 
   Future<Resource> _request(ResourceId id) async {
-    final Stream<DownloadResponse> stream = _client.resourceService().download(
+    final Stream<DownloadResponse> stream = _client.resourceService.download(
       DownloadRequest(
         resourceId: ResourceId(
-          namespace: 'user.${_auth.profile.userId}',
-          key: 'avatar.png',
+          namespace: ResourceNamespace(userIcon: Empty()),
+          key: _auth.user.userId,
         ),
       ),
       options: _auth.buildOptions(),
