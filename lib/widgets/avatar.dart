@@ -1,9 +1,9 @@
 import 'package:aura_app/grpc/resources.dart';
 import 'package:aura_app/sizer.dart';
-import 'package:aura_app/theme.dart';
 import 'package:aura_app/widgets/loader.dart';
 import 'package:aura_dart/resource.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:protobuf/well_known_types/google/protobuf/empty.pb.dart';
 
@@ -21,8 +21,8 @@ class Avatar extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final Color color = ref.watch(
-      themeProvider.select((ThemeData theme) => theme.colorScheme.primary),
+    final Color color = useMemoized(
+      () => Theme.of(context).colorScheme.primary,
     );
     final Sizer sizer = useSizer(context);
 
