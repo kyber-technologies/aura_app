@@ -425,8 +425,9 @@ class SettingsPage extends HookConsumerWidget {
                                                                   .buildOptions(),
                                                             );
 
-                                                        if (resp.hasError()) {
-                                                          ErrorDialog(
+                                                        if (resp.hasError() &&
+                                                            context.mounted) {
+                                                          await ErrorDialog(
                                                             ServiceException(
                                                               resp.error,
                                                             ),
@@ -434,7 +435,7 @@ class SettingsPage extends HookConsumerWidget {
                                                               ServiceErrorType,
                                                               String
                                                             >.identity(),
-                                                          );
+                                                          ).show(context);
                                                         }
 
                                                         resetAlgoTags.value
