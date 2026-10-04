@@ -1,14 +1,40 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:aura_app/chat.dart';
 import 'package:aura_app/grpc/auth.dart';
 import 'package:aura_app/info.dart';
+import 'package:aura_dart/user.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-final FutureProvider<Storage> storageProvider = FutureProvider<Storage>(
-  (Ref ref) async => await Storage.load(),
+final UserSettings defaultUserSettings = UserSettings(
+  resetAlgoTags: <String>[],
+  allowInvites: true,
+  algoLikeWeight: 0.65,
+  algoDislikeWeight: 0.5,
+  algoCommentWeight: 0.8,
+  algoTimeDecay: 0.55,
 );
+
+final AsyncNotifierProvider<StorageNotifier, Storage> storageProvider =
+    AsyncNotifierProvider<StorageNotifier, Storage>(StorageNotifier.new);
+
+class StorageNotifier extends AsyncNotifier<Storage> {
+  @override
+  Future<Storage> build() async => await Storage.load();
+
+  Future<void> updateSettings(void Function(Settings settings) update) async {
+    final Storage currentStorage = await future;
+
+    update(currentStorage.settings);
+
+    await currentStorage.save();
+
+    ref.invalidateSelf();
+    await future;
+  }
+}
 
 class Storage {
   final FlutterSecureStorage storage = FlutterSecureStorage(

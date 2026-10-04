@@ -41,7 +41,9 @@ class AuthService {
 
     final AuthService authService = AuthService(client, storage, storage.auth);
 
-    if (!authService.isValid()) {
+    if (authService.isValid()) {
+      await authService.refresh();
+    } else {
       authService.state = null;
       storage.auth = null;
     }

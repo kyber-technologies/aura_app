@@ -17,7 +17,8 @@ class Navbar extends HookConsumerWidget {
         return 0;
       } else if (routeName == chatRoute.name) {
         return 1;
-      } else if (routeName == profileRoute.name) {
+      } else if (routeName == profileRoute.name ||
+          routeName == settingsRoute.name) {
         return 2;
       } else {
         return 0;

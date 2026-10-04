@@ -1,4 +1,5 @@
 import 'package:aura_app/localizations.dart';
+import 'package:aura_app/widgets/copyable.dart';
 import 'package:flutter/material.dart';
 
 extension LocalizeExt on BuildContext {
@@ -224,13 +225,222 @@ extension TextExt on Text {
     );
   }
 
+  Text displaySmall(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+
+    return Text(
+      data ?? '',
+      key: key,
+      style: theme.textTheme.displaySmall,
+      strutStyle: strutStyle,
+      textAlign: textAlign,
+      textDirection: textDirection,
+      locale: locale,
+      softWrap: softWrap,
+      overflow: overflow,
+      textScaler: textScaler,
+      maxLines: maxLines,
+      semanticsLabel: semanticsLabel,
+      semanticsIdentifier: semanticsIdentifier,
+      textWidthBasis: textWidthBasis,
+      textHeightBehavior: textHeightBehavior,
+      selectionColor: selectionColor,
+    );
+  }
+
+  Text display(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+
+    return Text(
+      data ?? '',
+      key: key,
+      style: theme.textTheme.displayMedium,
+      strutStyle: strutStyle,
+      textAlign: textAlign,
+      textDirection: textDirection,
+      locale: locale,
+      softWrap: softWrap,
+      overflow: overflow,
+      textScaler: textScaler,
+      maxLines: maxLines,
+      semanticsLabel: semanticsLabel,
+      semanticsIdentifier: semanticsIdentifier,
+      textWidthBasis: textWidthBasis,
+      textHeightBehavior: textHeightBehavior,
+      selectionColor: selectionColor,
+    );
+  }
+
+  Text displayLarge(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+
+    return Text(
+      data ?? '',
+      key: key,
+      style: theme.textTheme.displayLarge,
+      strutStyle: strutStyle,
+      textAlign: textAlign,
+      textDirection: textDirection,
+      locale: locale,
+      softWrap: softWrap,
+      overflow: overflow,
+      textScaler: textScaler,
+      maxLines: maxLines,
+      semanticsLabel: semanticsLabel,
+      semanticsIdentifier: semanticsIdentifier,
+      textWidthBasis: textWidthBasis,
+      textHeightBehavior: textHeightBehavior,
+      selectionColor: selectionColor,
+    );
+  }
+
+  Text labelSmall(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+
+    return Text(
+      data ?? '',
+      key: key,
+      style: theme.textTheme.labelSmall,
+      strutStyle: strutStyle,
+      textAlign: textAlign,
+      textDirection: textDirection,
+      locale: locale,
+      softWrap: softWrap,
+      overflow: overflow,
+      textScaler: textScaler,
+      maxLines: maxLines,
+      semanticsLabel: semanticsLabel,
+      semanticsIdentifier: semanticsIdentifier,
+      textWidthBasis: textWidthBasis,
+      textHeightBehavior: textHeightBehavior,
+      selectionColor: selectionColor,
+    );
+  }
+
+  Text label(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+
+    return Text(
+      data ?? '',
+      key: key,
+      style: theme.textTheme.labelMedium,
+      strutStyle: strutStyle,
+      textAlign: textAlign,
+      textDirection: textDirection,
+      locale: locale,
+      softWrap: softWrap,
+      overflow: overflow,
+      textScaler: textScaler,
+      maxLines: maxLines,
+      semanticsLabel: semanticsLabel,
+      semanticsIdentifier: semanticsIdentifier,
+      textWidthBasis: textWidthBasis,
+      textHeightBehavior: textHeightBehavior,
+      selectionColor: selectionColor,
+    );
+  }
+
+  Text labelLarge(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+
+    return Text(
+      data ?? '',
+      key: key,
+      style: theme.textTheme.labelLarge,
+      strutStyle: strutStyle,
+      textAlign: textAlign,
+      textDirection: textDirection,
+      locale: locale,
+      softWrap: softWrap,
+      overflow: overflow,
+      textScaler: textScaler,
+      maxLines: maxLines,
+      semanticsLabel: semanticsLabel,
+      semanticsIdentifier: semanticsIdentifier,
+      textWidthBasis: textWidthBasis,
+      textHeightBehavior: textHeightBehavior,
+      selectionColor: selectionColor,
+    );
+  }
+
+  Text titleSmall(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+
+    return Text(
+      data ?? '',
+      key: key,
+      style: theme.textTheme.titleSmall,
+      strutStyle: strutStyle,
+      textAlign: textAlign,
+      textDirection: textDirection,
+      locale: locale,
+      softWrap: softWrap,
+      overflow: overflow,
+      textScaler: textScaler,
+      maxLines: maxLines,
+      semanticsLabel: semanticsLabel,
+      semanticsIdentifier: semanticsIdentifier,
+      textWidthBasis: textWidthBasis,
+      textHeightBehavior: textHeightBehavior,
+      selectionColor: selectionColor,
+    );
+  }
+
+  Text title(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+
+    return Text(
+      data ?? '',
+      key: key,
+      style: theme.textTheme.titleMedium,
+      strutStyle: strutStyle,
+      textAlign: textAlign,
+      textDirection: textDirection,
+      locale: locale,
+      softWrap: softWrap,
+      overflow: overflow,
+      textScaler: textScaler,
+      maxLines: maxLines,
+      semanticsLabel: semanticsLabel,
+      semanticsIdentifier: semanticsIdentifier,
+      textWidthBasis: textWidthBasis,
+      textHeightBehavior: textHeightBehavior,
+      selectionColor: selectionColor,
+    );
+  }
+
+  Text titleLarge(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+
+    return Text(
+      data ?? '',
+      key: key,
+      style: theme.textTheme.titleLarge,
+      strutStyle: strutStyle,
+      textAlign: textAlign,
+      textDirection: textDirection,
+      locale: locale,
+      softWrap: softWrap,
+      overflow: overflow,
+      textScaler: textScaler,
+      maxLines: maxLines,
+      semanticsLabel: semanticsLabel,
+      semanticsIdentifier: semanticsIdentifier,
+      textWidthBasis: textWidthBasis,
+      textHeightBehavior: textHeightBehavior,
+      selectionColor: selectionColor,
+    );
+  }
+
   Text error(BuildContext context) {
     final ThemeData theme = Theme.of(context);
 
     return Text(
       data ?? '',
       key: key,
-      style: style?.copyWith(color: theme.colorScheme.error),
+      style: (style ?? const TextStyle()).copyWith(
+        color: theme.colorScheme.error,
+      ),
       strutStyle: strutStyle,
       textAlign: textAlign,
       textDirection: textDirection,
@@ -248,10 +458,16 @@ extension TextExt on Text {
   }
 }
 
-extension Selectable on Widget {
+extension WidgetExt on Widget {
   SelectionArea selectable() => SelectionArea(child: this);
+
+  CopyableText copyable(String text) =>
+      CopyableText(textToCopy: text, child: this);
 }
 
 extension FutureExt<T> on Future<T> {
   Future<(T, U)> join<U>(Future<U> fut) async => (await this, await fut);
+
+  Future<(T, U, V)> join2<U, V>(Future<U> fut1, Future<V> fut2) async =>
+      (await this, await fut1, await fut2);
 }

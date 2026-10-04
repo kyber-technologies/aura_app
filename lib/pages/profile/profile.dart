@@ -35,18 +35,26 @@ class ProfilePage extends HookConsumerWidget {
                     width: sizer.sp(25),
                     height: sizer.sp(25),
                   ),
-                  Text(auth.user.username).headlineSmall(context).selectable(),
-                  sizer.box(h: 5),
+                  const SizedBox(height: 5),
                   Text(
-                    '@${auth.user.userId}',
-                  ).headlineSmall(context).selectable(),
-                  sizer.box(h: 5),
+                    auth.user.username,
+                  ).titleLarge(context).copyable(auth.user.username),
+                  Text('@${auth.user.userId}')
+                      .titleLarge(context)
+                      .copyWithStyle(
+                        color: Theme.of(context).colorScheme.tertiary,
+                        fontWeight: FontWeight.bold,
+                      )
+                      .copyable(auth.user.userId),
+                  const SizedBox(height: 15),
                   FilledButton.icon(
-                    onPressed: () {},
+                    onPressed: () {
+                      context.goNamed(settingsRoute.name);
+                    },
                     icon: const Icon(Icons.settings),
                     label: const Text('Settings'),
                   ),
-                  sizer.box(h: 5),
+                  const SizedBox(height: 10),
                   FilledButton.tonalIcon(
                     onPressed: () async {
                       await showDialog<void>(
@@ -79,7 +87,7 @@ class ProfilePage extends HookConsumerWidget {
                     icon: const Icon(Icons.logout),
                     label: const Text('Log Out'),
                   ),
-                  sizer.box(h: 20),
+                  const SizedBox(height: 30),
                   FilledButton.icon(
                     onPressed: () {
                       showAboutDialog(

@@ -4,6 +4,7 @@ import 'package:aura_app/pages/chat.dart';
 import 'package:aura_app/pages/feed.dart';
 import 'package:aura_app/pages/login.dart';
 import 'package:aura_app/pages/profile/profile.dart';
+import 'package:aura_app/pages/profile/settings.dart';
 import 'package:aura_app/pages/signup.dart';
 import 'package:aura_app/storage.dart';
 import 'package:flutter/material.dart';
@@ -28,6 +29,12 @@ const RouteDescriptor profileRoute = RouteDescriptor(
   page: ProfilePage(),
 );
 
+const RouteDescriptor settingsRoute = RouteDescriptor(
+  path: '/profile/settings',
+  name: 'profile-settings',
+  page: SettingsPage(),
+);
+
 const RouteDescriptor loginRoute = RouteDescriptor(
   path: '/login',
   name: 'login',
@@ -40,40 +47,59 @@ const RouteDescriptor signupRoute = RouteDescriptor(
   page: SignupPage(),
 );
 
-final FutureProvider<GoRouter> routerProvider = FutureProvider<GoRouter>((
-  Ref ref,
-) async {
-  final AuthService auth = await ref.watch(authProvider.future);
-  final bool animations = await ref.watch(
-    storageProvider.selectAsync(
-      (Storage storage) => storage.settings.animations,
+final Provider<bool> animationsEnabledProvider = Provider<bool>(
+  (Ref ref) => ref.watch(
+    storageProvider.select(
+      (AsyncValue<Storage> storage) =>
+          storage.value?.settings.animations ?? true,
     ),
-  );
+  ),
+);
+
+final Provider<GoRouter> routerProvider = Provider<GoRouter>((Ref ref) {
+  final AsyncValue<AuthService> authAsync = ref.watch(authProvider);
+  final AuthService? auth = authAsync.value;
 
   return GoRouter(
-    routes: <GoRoute>[
-      feedRoute.toRoute(animations, auth),
-      chatRoute.toRoute(animations, auth),
-      profileRoute.toRoute(animations, auth),
-      loginRoute.toRoute(animations, null),
-      signupRoute.toRoute(animations, null),
-    ],
     initialLocation: '/',
+    routes: <GoRoute>[
+      feedRoute.toRoute(ref, auth),
+      chatRoute.toRoute(ref, auth),
+      profileRoute.toRoute(ref, auth),
+      settingsRoute.toRoute(ref, auth),
+      loginRoute.toRoute(ref, null),
+      signupRoute.toRoute(ref, null),
+    ],
   );
 });
 
 Page<void> Function(BuildContext context, GoRouterState state) buildPage(
   Widget page,
-  bool animations,
-) =>
-    (BuildContext context, GoRouterState state) => animations
-    ? MaterialPage<void>(child: page)
-    : NoTransitionPage<void>(child: page);
+  Ref ref,
+) => (BuildContext context, GoRouterState state) {
+  final bool animations = ref.read(animationsEnabledProvider);
+
+  if (!animations) {
+    return NoTransitionPage<void>(key: state.pageKey, child: page);
+  }
+
+  return CustomTransitionPage<void>(
+    key: state.pageKey,
+    child: page,
+    transitionsBuilder:
+        (
+          BuildContext context,
+          Animation<double> animation,
+          Animation<double> secondaryAnimation,
+          Widget child,
+        ) => FadeTransition(opacity: animation, child: child),
+  );
+};
 
 String? Function(BuildContext context, GoRouterState state) buildRedirect(
-  AuthService auth,
+  AuthService? auth,
 ) => (BuildContext context, GoRouterState state) {
-  if (!auth.isValid()) {
+  if (auth == null || !auth.isValid()) {
     logger.i('Not authenticated. Redirecting to login route...');
     return loginRoute.path;
   }
@@ -93,10 +119,10 @@ class RouteDescriptor {
     required this.page,
   });
 
-  GoRoute toRoute(bool animations, AuthService? auth) => GoRoute(
+  GoRoute toRoute(Ref ref, AuthService? auth) => GoRoute(
     path: path,
     name: name,
-    pageBuilder: buildPage(page, animations),
-    redirect: auth == null ? (_, _) => null : buildRedirect(auth),
+    pageBuilder: buildPage(page, ref),
+    redirect: auth == null ? null : buildRedirect(auth),
   );
 }

@@ -1,0 +1,420 @@
+import 'package:aura_app/ext.dart';
+import 'package:aura_app/grpc/auth.dart';
+import 'package:aura_app/grpc/client.dart';
+import 'package:aura_app/grpc/exception.dart';
+import 'package:aura_app/sizer.dart';
+import 'package:aura_app/storage.dart';
+import 'package:aura_app/widgets/error_dialog.dart';
+import 'package:aura_app/widgets/loader.dart';
+import 'package:aura_app/widgets/navbar.dart';
+import 'package:aura_app/widgets/scrollview.dart';
+import 'package:aura_app/widgets/tag_list.dart';
+import 'package:aura_app/widgets/tile.dart';
+import 'package:aura_dart/user.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
+
+class SettingsPage extends HookConsumerWidget {
+  const SettingsPage({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final Sizer sizer = useSizer(context);
+
+    final Future<Settings> localSettings = ref.watch(
+      storageProvider.selectAsync((Storage storage) => storage.settings),
+    );
+    final Future<AuthService> authFut = ref.watch(authProvider.future);
+
+    final ValueNotifier<bool?> allowInvites = useState<bool?>(null);
+
+    final ValueNotifier<bool?> darkMode = useState<bool?>(null);
+    final ValueNotifier<bool?> animations = useState<bool?>(null);
+
+    final ValueNotifier<bool?> notifyInvite = useState<bool?>(null);
+    final ValueNotifier<bool?> notifyMessage = useState<bool?>(null);
+    final ValueNotifier<bool?> notifyComment = useState<bool?>(null);
+
+    final ValueNotifier<double?> algoLikeWeight = useState<double?>(null);
+    final ValueNotifier<double?> algoDislikeWeight = useState<double?>(null);
+    final ValueNotifier<double?> algoCommentWeight = useState<double?>(null);
+    final ValueNotifier<double?> algoTimeDecay = useState<double?>(null);
+    final ValueNotifier<List<String>> resetAlgoTags = useState(<String>[]);
+
+    return Scaffold(
+      bottomNavigationBar: const Navbar(),
+      body: Loader<(Settings, AuthService)>(localSettings.join(authFut), (
+        BuildContext context,
+        WidgetRef ref,
+        (Settings, AuthService) result,
+      ) {
+        final Settings settings = result.$1;
+        final AuthService auth = result.$2;
+
+        return Center(
+          child: FullScrollView(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                const SizedBox(height: 25),
+                // GENERAL
+                Card(
+                  child: Column(
+                    children: <Widget>[
+                      const SizedBox(height: 20),
+                      Text(context.l10n.general).headlineSmall(context),
+                      const SizedBox(height: 5),
+                      Tile(
+                        title: Text(context.l10n.allowInvites).title(context),
+                        tooltip: context.l10n.allowInvitesDesc,
+                        width: sizer.wp(0.7),
+                        content: Checkbox(
+                          value:
+                              allowInvites.value ??
+                              auth.user.settings.allowInvites,
+                          onChanged: (bool? value) {
+                            allowInvites.value = value;
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 25),
+                // APPEARANCE
+                Card(
+                  child: Column(
+                    children: <Widget>[
+                      const SizedBox(height: 20),
+                      Text(context.l10n.appearance).headlineSmall(context),
+                      const SizedBox(height: 5),
+                      Tile(
+                        title: Text(context.l10n.darkMode).title(context),
+                        tooltip: context.l10n.darkModeDesc,
+                        width: sizer.wp(0.7),
+                        content: Checkbox(
+                          value: darkMode.value ?? settings.darkMode,
+                          onChanged: (bool? value) {
+                            darkMode.value = value;
+                          },
+                        ),
+                      ),
+                      Tile(
+                        title: Text(context.l10n.animations).title(context),
+                        tooltip: context.l10n.animationsDesc,
+                        width: sizer.wp(0.7),
+                        content: Checkbox(
+                          value: animations.value ?? settings.animations,
+                          onChanged: (bool? value) {
+                            animations.value = value;
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 25),
+                // NOTIFICATIONS
+                Card(
+                  child: Column(
+                    children: <Widget>[
+                      const SizedBox(height: 20),
+                      Text(context.l10n.notifications).headlineSmall(context),
+                      const SizedBox(height: 5),
+                      Tile(
+                        title: Text(context.l10n.notifyInvites).title(context),
+                        tooltip: context.l10n.notifyInvitesDesc,
+                        width: sizer.wp(0.7),
+                        content: Checkbox(
+                          value:
+                              notifyInvite.value ??
+                              auth.user.settings.notifyInvite,
+                          onChanged: (bool? value) {
+                            notifyComment.value = value;
+                          },
+                        ),
+                      ),
+                      Tile(
+                        title: Text(context.l10n.notifyMessages).title(context),
+                        tooltip: context.l10n.notifyMessagesDesc,
+                        width: sizer.wp(0.7),
+                        content: Checkbox(
+                          value:
+                              notifyMessage.value ??
+                              auth.user.settings.notifyMessage,
+                          onChanged: (bool? value) {
+                            notifyMessage.value = value;
+                          },
+                        ),
+                      ),
+                      Tile(
+                        title: Text(context.l10n.notifyComments).title(context),
+                        tooltip: context.l10n.notifyCommentsDesc,
+                        width: sizer.wp(0.7),
+                        content: Checkbox(
+                          value:
+                              notifyComment.value ??
+                              auth.user.settings.notifyComment,
+                          onChanged: (bool? value) {
+                            notifyComment.value = value;
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 25),
+                // ALGORITHM
+                Card(
+                  child: Column(
+                    children: <Widget>[
+                      const SizedBox(height: 20),
+                      Text(context.l10n.algorithm).headlineSmall(context),
+                      const SizedBox(height: 5),
+                      Tile(
+                        title: Text(context.l10n.algoLikeWeight).title(context),
+                        tooltip: context.l10n.algoLikeWeightDesc,
+                        width: sizer.wp(0.7),
+                        content: Row(
+                          children: <Widget>[
+                            Text(
+                              (algoLikeWeight.value ??
+                                      auth.user.settings.algoLikeWeight)
+                                  .toStringAsFixed(2),
+                            ),
+                            SizedBox(
+                              width: 250,
+                              child: Slider(
+                                divisions: 20,
+                                value:
+                                    algoLikeWeight.value ??
+                                    auth.user.settings.algoLikeWeight,
+                                onChanged: (double value) {
+                                  algoLikeWeight.value = value;
+                                },
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 5),
+                      Tile(
+                        title: Text(
+                          context.l10n.algoDislikeWeight,
+                        ).title(context),
+                        tooltip: context.l10n.algoDislikeWeightDesc,
+                        width: sizer.wp(0.7),
+                        content: Row(
+                          children: <Widget>[
+                            Text(
+                              (algoDislikeWeight.value ??
+                                      auth.user.settings.algoDislikeWeight)
+                                  .toStringAsFixed(2),
+                            ),
+                            SizedBox(
+                              width: 250,
+                              child: Slider(
+                                divisions: 20,
+                                value:
+                                    algoDislikeWeight.value ??
+                                    auth.user.settings.algoDislikeWeight,
+                                onChanged: (double value) {
+                                  algoDislikeWeight.value = value;
+                                },
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 5),
+                      Tile(
+                        title: Text(
+                          context.l10n.algoCommentWeight,
+                        ).title(context),
+                        tooltip: context.l10n.algoCommentWeightDesc,
+                        width: sizer.wp(0.7),
+                        content: Row(
+                          children: <Widget>[
+                            Text(
+                              (algoCommentWeight.value ??
+                                      auth.user.settings.algoCommentWeight)
+                                  .toStringAsFixed(2),
+                            ),
+                            SizedBox(
+                              width: 250,
+                              child: Slider(
+                                divisions: 20,
+                                value:
+                                    algoCommentWeight.value ??
+                                    auth.user.settings.algoCommentWeight,
+                                onChanged: (double value) {
+                                  algoCommentWeight.value = value;
+                                },
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 5),
+                      Tile(
+                        title: Text(context.l10n.algoTimeDecay).title(context),
+                        tooltip: context.l10n.algoTimeDecayDesc,
+                        width: sizer.wp(0.7),
+                        content: Row(
+                          children: <Widget>[
+                            Text(
+                              (algoTimeDecay.value ??
+                                      auth.user.settings.algoTimeDecay)
+                                  .toStringAsFixed(2),
+                            ),
+                            SizedBox(
+                              width: 250,
+                              child: Slider(
+                                divisions: 20,
+                                value:
+                                    algoTimeDecay.value ??
+                                    auth.user.settings.algoTimeDecay,
+                                onChanged: (double value) {
+                                  algoTimeDecay.value = value;
+                                },
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 5),
+                      FilledButton.icon(
+                        onPressed: () async {
+                          await showDialog<void>(
+                            context: context,
+                            builder: (BuildContext context) => Dialog(
+                              child: sizer.box(
+                                w: 200,
+                                h: 100,
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: <Widget>[
+                                    Text(
+                                      context.l10n.tagsDesc,
+                                    ).titleLarge(context),
+                                    const SizedBox(height: 15),
+                                    TagList(
+                                      onChanged: (List<String> tags) {
+                                        resetAlgoTags.value = tags;
+                                      },
+                                    ),
+                                    const SizedBox(height: 7.5),
+                                    if (resetAlgoTags.value.isEmpty)
+                                      Text(
+                                        context.l10n.noTagsSpecified,
+                                        textAlign: TextAlign.center,
+                                      ).title(context).error(context),
+                                    const SizedBox(height: 7.5),
+                                    FilledButton(
+                                      onPressed: () async {
+                                        if (resetAlgoTags.value.isNotEmpty) {
+                                          await showDialog<void>(
+                                            context: context,
+                                            builder: (BuildContext context) =>
+                                                AlertDialog(
+                                                  title: Text(
+                                                    context
+                                                        .l10n
+                                                        .resetAlgoConfirm,
+                                                  ).titleLarge(context),
+                                                  content: Text(
+                                                    context
+                                                        .l10n
+                                                        .resetAlgoConfirmBody,
+                                                  ).title(context),
+                                                  actions: <Widget>[
+                                                    FilledButton.icon(
+                                                      onPressed: () async {
+                                                        if (context.mounted) {
+                                                          Navigator.pop(
+                                                            context,
+                                                          );
+                                                          Navigator.pop(
+                                                            context,
+                                                          );
+                                                        }
+
+                                                        final AuraClient
+                                                        client = await ref.read(
+                                                          auraClientProvider
+                                                              .future,
+                                                        );
+
+                                                        final UpdateResponse
+                                                        resp = await client
+                                                            .userService
+                                                            .update(
+                                                              UpdateRequest(),
+                                                            );
+
+                                                        if (resp.hasError()) {
+                                                          ErrorDialog(
+                                                            ServiceException(
+                                                              resp.error,
+                                                            ),
+                                                            Map<
+                                                              ServiceErrorType,
+                                                              String
+                                                            >.identity(),
+                                                          );
+                                                        }
+
+                                                        resetAlgoTags.value
+                                                            .clear();
+                                                      },
+                                                      label: Text(
+                                                        context.l10n.yes,
+                                                      ),
+                                                      icon: const Icon(
+                                                        Icons.check,
+                                                      ),
+                                                    ),
+                                                    FilledButton.icon(
+                                                      onPressed: () {
+                                                        resetAlgoTags.value
+                                                            .clear();
+                                                        Navigator.pop(context);
+                                                        Navigator.pop(context);
+                                                      },
+                                                      label: Text(
+                                                        context.l10n.no,
+                                                      ),
+                                                      icon: const Icon(
+                                                        Icons.close,
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                          );
+                                        }
+                                      },
+                                      child: Text(context.l10n.resetAlgo),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                        label: Text(context.l10n.resetAlgo),
+                        icon: const Icon(Icons.restart_alt),
+                      ),
+                      const SizedBox(height: 25),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 25),
+              ],
+            ),
+          ),
+        );
+      }),
+    );
+  }
+}

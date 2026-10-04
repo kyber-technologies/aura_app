@@ -25,64 +25,61 @@ class App extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final TextTheme textTheme = useMemoized(() => createTextTheme(context));
-    final Future<GoRouter> routerFut = ref.watch(routerProvider.future);
+    final GoRouter router = ref.watch(routerProvider);
     final Future<bool> darkThemeFut = ref.watch(
-      storageProvider.future.select(
-        (Future<Storage> fut) =>
-            fut.then((Storage storage) => storage.settings.darkMode),
+      storageProvider.selectAsync(
+        (Storage storage) => storage.settings.darkMode,
       ),
     );
 
-    return FutureBuilder<(GoRouter, bool)>(
-      future: routerFut.join(darkThemeFut),
-      builder:
-          (BuildContext context, AsyncSnapshot<(GoRouter, bool)> snapshot) {
-            if (snapshot.hasError) {
-              return MaterialApp(
-                title: 'Aura Error',
-                debugShowCheckedModeBanner: false,
-                home: Scaffold(
-                  body: Center(
-                    child: Text('Error: ${snapshot.error}').error(context),
-                  ),
-                ),
-              );
-            } else if (snapshot.hasData) {
-              final GoRouter router = snapshot.data!.$1;
-              final bool darkMode = snapshot.data!.$2;
+    return FutureBuilder<bool>(
+      future: darkThemeFut,
+      builder: (BuildContext context, AsyncSnapshot<bool> snapshot) {
+        if (snapshot.hasError) {
+          return MaterialApp(
+            title: 'Aura Error',
+            debugShowCheckedModeBanner: false,
+            home: Scaffold(
+              body: Center(
+                child: Text('Error: ${snapshot.error}').error(context),
+              ),
+            ),
+          );
+        } else if (snapshot.hasData) {
+          final bool darkMode = snapshot.data!;
 
-              return MaterialApp.router(
-                title: 'Aura',
-                theme: darkMode
-                    ? MaterialTheme(textTheme).dark()
-                    : MaterialTheme(textTheme).light(),
-                debugShowCheckedModeBanner: false,
-                routerConfig: RouterConfig<RouteMatchList>(
-                  routerDelegate: router.routerDelegate,
-                  routeInformationParser: router.routeInformationParser,
-                  routeInformationProvider: router.routeInformationProvider,
-                  backButtonDispatcher: router.backButtonDispatcher,
+          return MaterialApp.router(
+            title: 'Aura',
+            theme: darkMode
+                ? MaterialTheme(textTheme).dark()
+                : MaterialTheme(textTheme).light(),
+            debugShowCheckedModeBanner: false,
+            routerConfig: RouterConfig<RouteMatchList>(
+              routerDelegate: router.routerDelegate,
+              routeInformationParser: router.routeInformationParser,
+              routeInformationProvider: router.routeInformationProvider,
+              backButtonDispatcher: router.backButtonDispatcher,
+            ),
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+          );
+        } else {
+          return const MaterialApp(
+            title: 'Loading Aura',
+            debugShowCheckedModeBanner: false,
+            home: Scaffold(
+              body: Center(
+                child: Flex(
+                  direction: Axis.vertical,
+                  children: <Widget>[
+                    Flexible(child: LinearProgressIndicator()),
+                  ],
                 ),
-                localizationsDelegates: AppLocalizations.localizationsDelegates,
-                supportedLocales: AppLocalizations.supportedLocales,
-              );
-            } else {
-              return const MaterialApp(
-                title: 'Loading Aura',
-                debugShowCheckedModeBanner: false,
-                home: Scaffold(
-                  body: Center(
-                    child: Flex(
-                      direction: Axis.vertical,
-                      children: <Widget>[
-                        Flexible(child: LinearProgressIndicator()),
-                      ],
-                    ),
-                  ),
-                ),
-              );
-            }
-          },
+              ),
+            ),
+          );
+        }
+      },
     );
   }
 }

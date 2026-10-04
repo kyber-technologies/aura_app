@@ -23,8 +23,8 @@ Future<void> initLogger() async {
     filter: ProductionFilter(),
     printer: HybridPrinter(
       SimplePrinter(),
-      error: PrettyPrinter(),
-      fatal: PrettyPrinter(),
+      error: SimplePrinter(),
+      fatal: SimplePrinter(),
     ),
     output: await _buildOutput(logDir),
     level: _parseLevel(level),

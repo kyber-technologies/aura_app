@@ -364,15 +364,11 @@ class ColorFamily {
 }
 
 TextTheme createTextTheme(BuildContext context) {
-  final TextTheme baseTextTheme = Theme.of(context).textTheme;
+  final TextTheme baseTextTheme = Typography.material2021().black;
 
-  final TextTheme bodyTextTheme = GoogleFonts.getTextTheme(
-    'Raleway',
-    baseTextTheme,
-  );
+  final TextTheme bodyTextTheme = GoogleFonts.ralewayTextTheme(baseTextTheme);
 
-  final TextTheme displayTextTheme = GoogleFonts.getTextTheme(
-    'Quicksand',
+  final TextTheme displayTextTheme = GoogleFonts.quicksandTextTheme(
     baseTextTheme,
   );
 

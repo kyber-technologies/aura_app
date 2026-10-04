@@ -94,6 +94,12 @@ abstract class AppLocalizations {
   /// A list of this localizations delegate's supported locales.
   static const List<Locale> supportedLocales = <Locale>[Locale('en')];
 
+  /// No description provided for @copiedToClipboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Copied to Clipboard'**
+  String get copiedToClipboard;
+
   /// No description provided for @userid.
   ///
   /// In en, this message translates to:
@@ -112,11 +118,11 @@ abstract class AppLocalizations {
   /// **'Please enter a valid user identifier with a minimum length of 3 characters'**
   String get useridInvalid;
 
-  /// No description provided for @useridNotUnique.
+  /// No description provided for @userNotUnique.
   ///
   /// In en, this message translates to:
-  /// **'User Id is already taken'**
-  String get useridNotUnique;
+  /// **'User Id or Email is already taken'**
+  String get userNotUnique;
 
   /// No description provided for @username.
   ///
@@ -184,6 +190,18 @@ abstract class AppLocalizations {
   /// **'Signup'**
   String get signup;
 
+  /// No description provided for @tagsDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Add your interests:'**
+  String get tagsDesc;
+
+  /// No description provided for @noTagsSpecified.
+  ///
+  /// In en, this message translates to:
+  /// **'Please specify at least one of your interests'**
+  String get noTagsSpecified;
+
   /// No description provided for @verifyEmail.
   ///
   /// In en, this message translates to:
@@ -250,11 +268,179 @@ abstract class AppLocalizations {
   /// **'No'**
   String get no;
 
+  /// No description provided for @close.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get close;
+
   /// No description provided for @submit.
   ///
   /// In en, this message translates to:
   /// **'Submit'**
   String get submit;
+
+  /// No description provided for @general.
+  ///
+  /// In en, this message translates to:
+  /// **'General'**
+  String get general;
+
+  /// No description provided for @allowInvites.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow Invites'**
+  String get allowInvites;
+
+  /// No description provided for @allowInvitesDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow invites and DMs from other users.'**
+  String get allowInvitesDesc;
+
+  /// No description provided for @appearance.
+  ///
+  /// In en, this message translates to:
+  /// **'Appearance'**
+  String get appearance;
+
+  /// No description provided for @darkMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Dark Mode'**
+  String get darkMode;
+
+  /// No description provided for @darkModeDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Toggle dark mode theme.'**
+  String get darkModeDesc;
+
+  /// No description provided for @animations.
+  ///
+  /// In en, this message translates to:
+  /// **'Animations'**
+  String get animations;
+
+  /// No description provided for @animationsDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable animations.'**
+  String get animationsDesc;
+
+  /// No description provided for @notifications.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications'**
+  String get notifications;
+
+  /// No description provided for @notifyInvites.
+  ///
+  /// In en, this message translates to:
+  /// **'Notify for Invites'**
+  String get notifyInvites;
+
+  /// No description provided for @notifyInvitesDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable notifications for invites.'**
+  String get notifyInvitesDesc;
+
+  /// No description provided for @notifyMessages.
+  ///
+  /// In en, this message translates to:
+  /// **'Notify for Messages'**
+  String get notifyMessages;
+
+  /// No description provided for @notifyMessagesDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable notifications for direct messages.'**
+  String get notifyMessagesDesc;
+
+  /// No description provided for @notifyComments.
+  ///
+  /// In en, this message translates to:
+  /// **'Notify for Comments'**
+  String get notifyComments;
+
+  /// No description provided for @notifyCommentsDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable notifications for comments on your posts.'**
+  String get notifyCommentsDesc;
+
+  /// No description provided for @algorithm.
+  ///
+  /// In en, this message translates to:
+  /// **'Algorithm'**
+  String get algorithm;
+
+  /// No description provided for @algoLikeWeight.
+  ///
+  /// In en, this message translates to:
+  /// **'Algorithm Like Weight'**
+  String get algoLikeWeight;
+
+  /// No description provided for @algoLikeWeightDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Weight of likes in the algorithm. Higher values can get you into filter bubbles.'**
+  String get algoLikeWeightDesc;
+
+  /// No description provided for @algoDislikeWeight.
+  ///
+  /// In en, this message translates to:
+  /// **'Algorithm Dislike Weight.'**
+  String get algoDislikeWeight;
+
+  /// No description provided for @algoDislikeWeightDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Weight of dislikes in the algorithm. Lower values can get you into filter bubbles.'**
+  String get algoDislikeWeightDesc;
+
+  /// No description provided for @algoCommentWeight.
+  ///
+  /// In en, this message translates to:
+  /// **'Algorithm Comment Weight'**
+  String get algoCommentWeight;
+
+  /// No description provided for @algoCommentWeightDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Weight of comments in the algorithm. Higher values can recommend you rage-bait posts.'**
+  String get algoCommentWeightDesc;
+
+  /// No description provided for @algoTimeDecay.
+  ///
+  /// In en, this message translates to:
+  /// **'Algorithm Time Decay'**
+  String get algoTimeDecay;
+
+  /// No description provided for @algoTimeDecayDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Time weight decay of posts. Higher values will give you more recent posts.'**
+  String get algoTimeDecayDesc;
+
+  /// No description provided for @resetAlgo.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset Algorithm'**
+  String get resetAlgo;
+
+  /// No description provided for @resetAlgoConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm Algorithm Reset'**
+  String get resetAlgoConfirm;
+
+  /// No description provided for @resetAlgoConfirmBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to reset your algorithm? This action cannot be undone.'**
+  String get resetAlgoConfirmBody;
 }
 
 class _AppLocalizationsDelegate
