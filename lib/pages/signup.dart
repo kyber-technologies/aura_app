@@ -40,7 +40,7 @@ class SignupPage extends HookConsumerWidget {
     final TextEditingController emailTokenController = useTextEditingController
         .fromValue(TextEditingValue.empty);
 
-    final ValueNotifier<List<String>> tags = useState<List<String>>(<String>[]);
+    final ValueNotifier<Set<String>> tags = useState<Set<String>>(<String>{});
 
     return Scaffold(
       bottomNavigationBar: const Navbar(),
@@ -164,7 +164,7 @@ class SignupPage extends HookConsumerWidget {
                           Text(context.l10n.tagsDesc),
                           const SizedBox(width: 10),
                           TagList(
-                            onChanged: (List<String> newTags) {
+                            onChanged: (Set<String> newTags) {
                               tags.value = newTags;
                             },
                             initialTags: tags.value,

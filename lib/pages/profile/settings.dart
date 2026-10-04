@@ -40,7 +40,7 @@ class SettingsPage extends HookConsumerWidget {
     final ValueNotifier<double?> algoDislikeWeight = useState<double?>(null);
     final ValueNotifier<double?> algoCommentWeight = useState<double?>(null);
     final ValueNotifier<double?> algoTimeDecay = useState<double?>(null);
-    final ValueNotifier<List<String>> resetAlgoTags = useState(<String>[]);
+    final ValueNotifier<Set<String>> resetAlgoTags = useState(<String>{});
 
     return Scaffold(
       bottomNavigationBar: const Navbar(),
@@ -290,8 +290,8 @@ class SettingsPage extends HookConsumerWidget {
                             context: context,
                             builder: (BuildContext context) => Dialog(
                               child: sizer.box(
-                                w: 200,
-                                h: 100,
+                                w: 125,
+                                h: 60,
                                 child: Column(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: <Widget>[
@@ -300,7 +300,7 @@ class SettingsPage extends HookConsumerWidget {
                                     ).titleLarge(context),
                                     const SizedBox(height: 15),
                                     TagList(
-                                      onChanged: (List<String> tags) {
+                                      onChanged: (Set<String> tags) {
                                         resetAlgoTags.value = tags;
                                       },
                                     ),
@@ -310,7 +310,7 @@ class SettingsPage extends HookConsumerWidget {
                                         context.l10n.noTagsSpecified,
                                         textAlign: TextAlign.center,
                                       ).title(context).error(context),
-                                    const SizedBox(height: 7.5),
+                                    const SizedBox(height: 25),
                                     FilledButton(
                                       onPressed: () async {
                                         if (resetAlgoTags.value.isNotEmpty) {

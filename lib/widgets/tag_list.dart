@@ -2,19 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 
 class TagList extends HookWidget {
-  final List<String> initialTags;
-  final ValueChanged<List<String>> onChanged;
+  final Set<String> initialTags;
+  final ValueChanged<Set<String>> onChanged;
 
   const TagList({
     required this.onChanged,
-    this.initialTags = const <String>[],
+    this.initialTags = const <String>{},
     super.key,
   });
 
   @override
   Widget build(BuildContext context) {
-    final ValueNotifier<List<String>> tags = useState<List<String>>(
-      List<String>.from(initialTags),
+    final ValueNotifier<Set<String>> tags = useState<Set<String>>(
+      Set<String>.from(initialTags),
     );
     final ValueNotifier<bool> isAdding = useState<bool>(false);
 
@@ -25,7 +25,7 @@ class TagList extends HookWidget {
     void submitTag() {
       final String value = controller.text.trim();
       if (value.isNotEmpty && !tags.value.contains(value)) {
-        final List<String> updated = List<String>.from(tags.value)..add(value);
+        final Set<String> updated = Set<String>.from(tags.value)..add(value);
         tags.value = updated;
         onChanged(updated);
         controller.clear();
@@ -43,9 +43,8 @@ class TagList extends HookWidget {
       isAdding.value = false;
     }
 
-    void removeTag(int index) {
-      final List<String> updated = List<String>.from(tags.value)
-        ..removeAt(index);
+    void removeTag(String value) {
+      final Set<String> updated = Set<String>.from(tags.value)..remove(value);
       tags.value = updated;
       onChanged(updated);
     }
@@ -56,20 +55,17 @@ class TagList extends HookWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
-          ...tags.value.asMap().entries.map((MapEntry<int, String> entry) {
-            final int index = entry.key;
-            final String tag = entry.value;
-
-            return Padding(
+          ...tags.value.map(
+            (String tag) => Padding(
               padding: const EdgeInsets.only(right: 8),
               child: InputChip(
                 label: Text(tag),
                 deleteIcon: const Icon(Icons.close, size: 16),
-                onDeleted: () => removeTag(index),
+                onDeleted: () => removeTag(tag),
                 visualDensity: VisualDensity.compact,
               ),
-            );
-          }),
+            ),
+          ),
 
           if (isAdding.value)
             Container(
