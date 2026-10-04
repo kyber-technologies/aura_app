@@ -2,6 +2,7 @@ import 'package:aura_app/ext.dart';
 import 'package:aura_app/grpc/auth.dart';
 import 'package:aura_app/grpc/client.dart';
 import 'package:aura_app/grpc/exception.dart';
+import 'package:aura_app/logger.dart';
 import 'package:aura_app/sizer.dart';
 import 'package:aura_app/storage.dart';
 import 'package:aura_app/widgets/error_dialog.dart';
@@ -40,9 +41,67 @@ class SettingsPage extends HookConsumerWidget {
     final ValueNotifier<double?> algoDislikeWeight = useState<double?>(null);
     final ValueNotifier<double?> algoCommentWeight = useState<double?>(null);
     final ValueNotifier<double?> algoTimeDecay = useState<double?>(null);
+
     final ValueNotifier<Set<String>> resetAlgoTags = useState(<String>{});
 
     return Scaffold(
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () async {
+          final AuraClient client = await ref.read(auraClientProvider.future);
+          final AuthService auth = await ref.read(authProvider.future);
+          final StorageNotifier storage = await ref.read(
+            storageProvider.notifier,
+          );
+
+          if (auth.user.settings.allowInvites != allowInvites.value ||
+              auth.user.settings.notifyInvite != notifyInvite.value ||
+              auth.user.settings.notifyComment != notifyComment.value ||
+              auth.user.settings.notifyMessage != notifyMessage.value ||
+              auth.user.settings.algoLikeWeight != algoLikeWeight.value ||
+              auth.user.settings.algoDislikeWeight != algoDislikeWeight.value ||
+              auth.user.settings.algoCommentWeight != algoCommentWeight.value ||
+              auth.user.settings.algoTimeDecay != algoTimeDecay.value) {
+            logger.i('Updating local settings...');
+            await storage.updateSettings((Settings settings) {
+              if (darkMode.value != null) {
+                settings.darkMode = darkMode.value!;
+              }
+
+              if (animations.value != null) {
+                settings.animations = animations.value!;
+              }
+            });
+
+            logger.i('Updating user settings...');
+            final UpdateResponse resp = await client.userService.update(
+              UpdateRequest(
+                settings: UserSettings(
+                  allowInvites: allowInvites.value,
+                  notifyInvite: notifyInvite.value,
+                  notifyMessage: notifyMessage.value,
+                  notifyComment: notifyComment.value,
+                  algoLikeWeight: algoLikeWeight.value,
+                  algoDislikeWeight: algoDislikeWeight.value,
+                  algoCommentWeight: algoCommentWeight.value,
+                  algoTimeDecay: algoTimeDecay.value,
+                ),
+              ),
+              options: auth.buildOptions(),
+            );
+
+            if (resp.hasError() && context.mounted) {
+              await ErrorDialog(
+                ServiceException(resp.error),
+                Map<ServiceErrorType, String>.identity(),
+              ).show(context);
+            }
+
+            await auth.refresh();
+          }
+        },
+        label: Text(context.l10n.save),
+        icon: const Icon(Icons.save),
+      ),
       bottomNavigationBar: const Navbar(),
       body: Loader<(Settings, AuthService)>(localSettings.join(authFut), (
         BuildContext context,
@@ -68,7 +127,7 @@ class SettingsPage extends HookConsumerWidget {
                       Tile(
                         title: Text(context.l10n.allowInvites).title(context),
                         tooltip: context.l10n.allowInvitesDesc,
-                        width: sizer.wp(0.7),
+                        width: sizer.wp(0.9),
                         content: Checkbox(
                           value:
                               allowInvites.value ??
@@ -78,6 +137,7 @@ class SettingsPage extends HookConsumerWidget {
                           },
                         ),
                       ),
+                      const SizedBox(height: 5),
                     ],
                   ),
                 ),
@@ -92,7 +152,7 @@ class SettingsPage extends HookConsumerWidget {
                       Tile(
                         title: Text(context.l10n.darkMode).title(context),
                         tooltip: context.l10n.darkModeDesc,
-                        width: sizer.wp(0.7),
+                        width: sizer.wp(0.9),
                         content: Checkbox(
                           value: darkMode.value ?? settings.darkMode,
                           onChanged: (bool? value) {
@@ -103,7 +163,7 @@ class SettingsPage extends HookConsumerWidget {
                       Tile(
                         title: Text(context.l10n.animations).title(context),
                         tooltip: context.l10n.animationsDesc,
-                        width: sizer.wp(0.7),
+                        width: sizer.wp(0.9),
                         content: Checkbox(
                           value: animations.value ?? settings.animations,
                           onChanged: (bool? value) {
@@ -125,20 +185,20 @@ class SettingsPage extends HookConsumerWidget {
                       Tile(
                         title: Text(context.l10n.notifyInvites).title(context),
                         tooltip: context.l10n.notifyInvitesDesc,
-                        width: sizer.wp(0.7),
+                        width: sizer.wp(0.9),
                         content: Checkbox(
                           value:
                               notifyInvite.value ??
                               auth.user.settings.notifyInvite,
                           onChanged: (bool? value) {
-                            notifyComment.value = value;
+                            notifyInvite.value = value;
                           },
                         ),
                       ),
                       Tile(
                         title: Text(context.l10n.notifyMessages).title(context),
                         tooltip: context.l10n.notifyMessagesDesc,
-                        width: sizer.wp(0.7),
+                        width: sizer.wp(0.9),
                         content: Checkbox(
                           value:
                               notifyMessage.value ??
@@ -151,7 +211,7 @@ class SettingsPage extends HookConsumerWidget {
                       Tile(
                         title: Text(context.l10n.notifyComments).title(context),
                         tooltip: context.l10n.notifyCommentsDesc,
-                        width: sizer.wp(0.7),
+                        width: sizer.wp(0.9),
                         content: Checkbox(
                           value:
                               notifyComment.value ??
@@ -175,7 +235,7 @@ class SettingsPage extends HookConsumerWidget {
                       Tile(
                         title: Text(context.l10n.algoLikeWeight).title(context),
                         tooltip: context.l10n.algoLikeWeightDesc,
-                        width: sizer.wp(0.7),
+                        width: sizer.wp(0.9),
                         content: Row(
                           children: <Widget>[
                             Text(
@@ -183,8 +243,9 @@ class SettingsPage extends HookConsumerWidget {
                                       auth.user.settings.algoLikeWeight)
                                   .toStringAsFixed(2),
                             ),
-                            SizedBox(
-                              width: 250,
+                            sizer.box(
+                              w: 100,
+                              h: 10,
                               child: Slider(
                                 divisions: 20,
                                 value:
@@ -204,7 +265,7 @@ class SettingsPage extends HookConsumerWidget {
                           context.l10n.algoDislikeWeight,
                         ).title(context),
                         tooltip: context.l10n.algoDislikeWeightDesc,
-                        width: sizer.wp(0.7),
+                        width: sizer.wp(0.9),
                         content: Row(
                           children: <Widget>[
                             Text(
@@ -212,8 +273,9 @@ class SettingsPage extends HookConsumerWidget {
                                       auth.user.settings.algoDislikeWeight)
                                   .toStringAsFixed(2),
                             ),
-                            SizedBox(
-                              width: 250,
+                            sizer.box(
+                              w: 100,
+                              h: 10,
                               child: Slider(
                                 divisions: 20,
                                 value:
@@ -233,7 +295,7 @@ class SettingsPage extends HookConsumerWidget {
                           context.l10n.algoCommentWeight,
                         ).title(context),
                         tooltip: context.l10n.algoCommentWeightDesc,
-                        width: sizer.wp(0.7),
+                        width: sizer.wp(0.9),
                         content: Row(
                           children: <Widget>[
                             Text(
@@ -241,8 +303,9 @@ class SettingsPage extends HookConsumerWidget {
                                       auth.user.settings.algoCommentWeight)
                                   .toStringAsFixed(2),
                             ),
-                            SizedBox(
-                              width: 250,
+                            sizer.box(
+                              w: 100,
+                              h: 10,
                               child: Slider(
                                 divisions: 20,
                                 value:
@@ -260,7 +323,7 @@ class SettingsPage extends HookConsumerWidget {
                       Tile(
                         title: Text(context.l10n.algoTimeDecay).title(context),
                         tooltip: context.l10n.algoTimeDecayDesc,
-                        width: sizer.wp(0.7),
+                        width: sizer.wp(0.9),
                         content: Row(
                           children: <Widget>[
                             Text(
@@ -268,8 +331,9 @@ class SettingsPage extends HookConsumerWidget {
                                       auth.user.settings.algoTimeDecay)
                                   .toStringAsFixed(2),
                             ),
-                            SizedBox(
-                              width: 250,
+                            sizer.box(
+                              w: 100,
+                              h: 10,
                               child: Slider(
                                 divisions: 20,
                                 value:
