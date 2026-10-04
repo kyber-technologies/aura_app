@@ -421,6 +421,8 @@ class SettingsPage extends HookConsumerWidget {
                                                                           .value,
                                                                 ),
                                                               ),
+                                                              options: auth
+                                                                  .buildOptions(),
                                                             );
 
                                                         if (resp.hasError()) {
