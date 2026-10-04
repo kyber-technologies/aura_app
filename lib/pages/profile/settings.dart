@@ -72,19 +72,26 @@ class SettingsPage extends HookConsumerWidget {
               }
             });
 
+            final UserSettings userSettings = auth.user.settings.deepCopy();
+
             logger.i('Updating user settings...');
             final UpdateResponse resp = await client.userService.update(
               UpdateRequest(
-                settings: UserSettings(
-                  allowInvites: allowInvites.value,
-                  notifyInvite: notifyInvite.value,
-                  notifyMessage: notifyMessage.value,
-                  notifyComment: notifyComment.value,
-                  algoLikeWeight: algoLikeWeight.value,
-                  algoDislikeWeight: algoDislikeWeight.value,
-                  algoCommentWeight: algoCommentWeight.value,
-                  algoTimeDecay: algoTimeDecay.value,
-                ),
+                settings: userSettings
+                  ..notifyInvite =
+                      notifyInvite.value ?? userSettings.notifyInvite
+                  ..notifyMessage =
+                      notifyMessage.value ?? userSettings.notifyMessage
+                  ..notifyComment =
+                      notifyComment.value ?? userSettings.notifyComment
+                  ..algoLikeWeight =
+                      algoLikeWeight.value ?? userSettings.algoLikeWeight
+                  ..algoDislikeWeight =
+                      algoDislikeWeight.value ?? userSettings.algoDislikeWeight
+                  ..algoCommentWeight =
+                      algoCommentWeight.value ?? userSettings.algoCommentWeight
+                  ..algoTimeDecay =
+                      algoTimeDecay.value ?? userSettings.algoTimeDecay,
               ),
               options: auth.buildOptions(),
             );
@@ -380,90 +387,78 @@ class SettingsPage extends HookConsumerWidget {
                                         if (resetAlgoTags.value.isNotEmpty) {
                                           await showDialog<void>(
                                             context: context,
-                                            builder: (BuildContext context) =>
-                                                AlertDialog(
-                                                  title: Text(
-                                                    context
-                                                        .l10n
-                                                        .resetAlgoConfirm,
-                                                  ).titleLarge(context),
-                                                  content: Text(
-                                                    context
-                                                        .l10n
-                                                        .resetAlgoConfirmBody,
-                                                  ).title(context),
-                                                  actions: <Widget>[
-                                                    FilledButton.icon(
-                                                      onPressed: () async {
-                                                        if (context.mounted) {
-                                                          Navigator.pop(
-                                                            context,
-                                                          );
-                                                          Navigator.pop(
-                                                            context,
-                                                          );
-                                                        }
+                                            builder: (BuildContext context) => AlertDialog(
+                                              title: Text(
+                                                context.l10n.resetAlgoConfirm,
+                                              ).titleLarge(context),
+                                              content: Text(
+                                                context
+                                                    .l10n
+                                                    .resetAlgoConfirmBody,
+                                              ).title(context),
+                                              actions: <Widget>[
+                                                FilledButton.icon(
+                                                  onPressed: () async {
+                                                    if (context.mounted) {
+                                                      Navigator.pop(context);
+                                                      Navigator.pop(context);
+                                                    }
 
-                                                        final AuraClient
-                                                        client = await ref.read(
-                                                          auraClientProvider
-                                                              .future,
+                                                    final AuraClient
+                                                    client = await ref.read(
+                                                      auraClientProvider.future,
+                                                    );
+
+                                                    logger.i(
+                                                      'Resetting user algo...',
+                                                    );
+                                                    final UpdateResponse
+                                                    resp = await client
+                                                        .userService
+                                                        .update(
+                                                          UpdateRequest(
+                                                            settings: UserSettings(
+                                                              resetAlgoTags:
+                                                                  resetAlgoTags
+                                                                      .value,
+                                                            ),
+                                                          ),
+                                                          options: auth
+                                                              .buildOptions(),
                                                         );
 
-                                                        final UpdateResponse
-                                                        resp = await client
-                                                            .userService
-                                                            .update(
-                                                              UpdateRequest(
-                                                                settings: UserSettings(
-                                                                  resetAlgoTags:
-                                                                      resetAlgoTags
-                                                                          .value,
-                                                                ),
-                                                              ),
-                                                              options: auth
-                                                                  .buildOptions(),
-                                                            );
+                                                    if (resp.hasError() &&
+                                                        context.mounted) {
+                                                      logger.e(
+                                                        'Failed to reset user algo: ${resp.error}',
+                                                      );
+                                                      await ErrorDialog(
+                                                        ServiceException(
+                                                          resp.error,
+                                                        ),
+                                                        Map<
+                                                          ServiceErrorType,
+                                                          String
+                                                        >.identity(),
+                                                      ).show(context);
+                                                    }
 
-                                                        if (resp.hasError() &&
-                                                            context.mounted) {
-                                                          await ErrorDialog(
-                                                            ServiceException(
-                                                              resp.error,
-                                                            ),
-                                                            Map<
-                                                              ServiceErrorType,
-                                                              String
-                                                            >.identity(),
-                                                          ).show(context);
-                                                        }
-
-                                                        resetAlgoTags.value
-                                                            .clear();
-                                                      },
-                                                      label: Text(
-                                                        context.l10n.yes,
-                                                      ),
-                                                      icon: const Icon(
-                                                        Icons.check,
-                                                      ),
-                                                    ),
-                                                    FilledButton.icon(
-                                                      onPressed: () {
-                                                        resetAlgoTags.value
-                                                            .clear();
-                                                        Navigator.pop(context);
-                                                        Navigator.pop(context);
-                                                      },
-                                                      label: Text(
-                                                        context.l10n.no,
-                                                      ),
-                                                      icon: const Icon(
-                                                        Icons.close,
-                                                      ),
-                                                    ),
-                                                  ],
+                                                    resetAlgoTags.value.clear();
+                                                  },
+                                                  label: Text(context.l10n.yes),
+                                                  icon: const Icon(Icons.check),
                                                 ),
+                                                FilledButton.icon(
+                                                  onPressed: () {
+                                                    resetAlgoTags.value.clear();
+                                                    Navigator.pop(context);
+                                                    Navigator.pop(context);
+                                                  },
+                                                  label: Text(context.l10n.no),
+                                                  icon: const Icon(Icons.close),
+                                                ),
+                                              ],
+                                            ),
                                           );
                                         }
                                       },
