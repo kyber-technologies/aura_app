@@ -229,8 +229,14 @@ abstract class AppLocalizations {
   /// No description provided for @unauthorizedLoginError.
   ///
   /// In en, this message translates to:
-  /// **'Credentials are invalid. Please try again.'**
+  /// **'Specified invalid user credentials.'**
   String get unauthorizedLoginError;
+
+  /// No description provided for @rateLimitError.
+  ///
+  /// In en, this message translates to:
+  /// **'You are doing things too fast! Please slow down.'**
+  String get rateLimitError;
 
   /// No description provided for @settings.
   ///

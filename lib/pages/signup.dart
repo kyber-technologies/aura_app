@@ -7,6 +7,7 @@ import 'package:aura_app/router.dart';
 import 'package:aura_app/sizer.dart';
 import 'package:aura_app/storage.dart';
 import 'package:aura_app/utils.dart';
+import 'package:aura_app/widgets/error_dialog.dart';
 import 'package:aura_app/widgets/loader.dart';
 import 'package:aura_app/widgets/navbar.dart';
 import 'package:aura_app/widgets/tag_list.dart';
@@ -40,8 +41,6 @@ class SignupPage extends HookConsumerWidget {
         .fromValue(TextEditingValue.empty);
 
     final ValueNotifier<List<String>> tags = useState<List<String>>(<String>[]);
-
-    final ValueNotifier<Exception?> result = useState(null);
 
     return Scaffold(
       bottomNavigationBar: const Navbar(),
@@ -126,8 +125,6 @@ class SignupPage extends HookConsumerWidget {
 
                           if (formKey.value.currentState!.validate()) {
                             try {
-                              result.value = null;
-
                               await auth.login(
                                 userId: useridController.text,
                                 password: passwordController.text,
@@ -139,7 +136,15 @@ class SignupPage extends HookConsumerWidget {
                             } on Exception catch (exception) {
                               logger.e(exception);
 
-                              result.value = exception;
+                              if (context.mounted) {
+                                await ErrorDialog(
+                                  exception,
+                                  <ServiceErrorType, String>{
+                                    ServiceErrorType.alreadyExists:
+                                        context.l10n.userNotUnique,
+                                  },
+                                ).show(context);
+                              }
                             }
                           }
                         },
@@ -171,8 +176,6 @@ class SignupPage extends HookConsumerWidget {
                         onPressed: () async {
                           if (formKey.value.currentState!.validate()) {
                             try {
-                              result.value = null;
-
                               if (tags.value.isEmpty) {
                                 throw ServiceException(
                                   Error(
@@ -291,37 +294,22 @@ class SignupPage extends HookConsumerWidget {
                             } on Exception catch (exception) {
                               logger.e(exception);
 
-                              result.value = exception;
+                              if (context.mounted) {
+                                await ErrorDialog(
+                                  exception,
+                                  <ServiceErrorType, String>{
+                                    ServiceErrorType.alreadyExists:
+                                        context.l10n.userNotUnique,
+                                  },
+                                ).show(context);
+                              }
                             }
                           }
                         },
                         icon: const Icon(Icons.login),
                         label: Text(context.l10n.signup),
                       ),
-                      const SizedBox(height: 5),
-                      Builder(
-                        builder: (BuildContext context) {
-                          if (result.value == null) {
-                            return const Text('');
-                          } else {
-                            final Exception serviceError = result.value!;
-
-                            if (serviceError is ServiceException) {
-                              return Text(
-                                '${serviceError.error.message} '
-                                '(${serviceError.error.code()})',
-                                textAlign: TextAlign.center,
-                              ).bodyLarge(context).error(context);
-                            } else {
-                              return Text(
-                                '${context.l10n.unexpectedError} - '
-                                '$serviceError',
-                                textAlign: TextAlign.center,
-                              ).bodyLarge(context).error(context);
-                            }
-                          }
-                        },
-                      ),
+                      const SizedBox(height: 10),
                       TextButton(
                         onPressed: () {
                           context.goNamed(loginRoute.name);

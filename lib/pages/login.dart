@@ -4,6 +4,7 @@ import 'package:aura_app/grpc/exception.dart';
 import 'package:aura_app/logger.dart';
 import 'package:aura_app/router.dart';
 import 'package:aura_app/sizer.dart';
+import 'package:aura_app/widgets/error_dialog.dart';
 import 'package:aura_app/widgets/loader.dart';
 import 'package:aura_app/widgets/navbar.dart';
 import 'package:flutter/material.dart';
@@ -24,8 +25,6 @@ class LoginPage extends HookConsumerWidget {
         .fromValue(TextEditingValue.empty);
     final TextEditingController passwordController = useTextEditingController
         .fromValue(TextEditingValue.empty);
-
-    final ValueNotifier<Exception?> result = useState(null);
 
     return Scaffold(
       bottomNavigationBar: const Navbar(),
@@ -71,8 +70,6 @@ class LoginPage extends HookConsumerWidget {
 
                           if (formKey.value.currentState!.validate()) {
                             try {
-                              result.value = null;
-
                               await auth.login(
                                 userId: useridController.text,
                                 password: passwordController.text,
@@ -84,7 +81,15 @@ class LoginPage extends HookConsumerWidget {
                             } on Exception catch (exception) {
                               logger.e(exception);
 
-                              result.value = exception;
+                              if (context.mounted) {
+                                await ErrorDialog(
+                                  exception,
+                                  <ServiceErrorType, String>{
+                                    ServiceErrorType.unauthorized:
+                                        context.l10n.unauthorizedLoginError,
+                                  },
+                                ).show(context);
+                              }
                             }
                           }
                         },
@@ -100,8 +105,6 @@ class LoginPage extends HookConsumerWidget {
                         onPressed: () async {
                           if (formKey.value.currentState!.validate()) {
                             try {
-                              result.value = null;
-
                               await auth.login(
                                 userId: useridController.text,
                                 password: passwordController.text,
@@ -113,47 +116,22 @@ class LoginPage extends HookConsumerWidget {
                             } on Exception catch (exception) {
                               logger.e(exception);
 
-                              result.value = exception;
+                              if (context.mounted) {
+                                await ErrorDialog(
+                                  exception,
+                                  <ServiceErrorType, String>{
+                                    ServiceErrorType.unauthorized:
+                                        context.l10n.unauthorizedLoginError,
+                                  },
+                                ).show(context);
+                              }
                             }
                           }
                         },
                         icon: const Icon(Icons.login),
                         label: Text(context.l10n.login),
                       ),
-                      Builder(
-                        builder: (BuildContext context) {
-                          if (result.value == null) {
-                            return const Text('');
-                          } else {
-                            final Exception serviceError = result.value!;
-
-                            if (serviceError is ServiceException) {
-                              final ServiceException exception =
-                                  result.value! as ServiceException;
-
-                              if (exception.error.hasUnauthorized()) {
-                                return Text(
-                                  context.l10n.unauthorizedLoginError,
-                                  textAlign: TextAlign.center,
-                                ).bodyLarge(context).error(context);
-                              } else {
-                                return Text(
-                                  '${context.l10n.unexpectedError} - '
-                                  '${serviceError.error.message} '
-                                  '(${serviceError.error.code})',
-                                  textAlign: TextAlign.center,
-                                ).bodyLarge(context).error(context);
-                              }
-                            } else {
-                              return Text(
-                                '${context.l10n.unexpectedError} - '
-                                '$serviceError',
-                                textAlign: TextAlign.center,
-                              ).bodyLarge(context).error(context);
-                            }
-                          }
-                        },
-                      ),
+                      const SizedBox(height: 10),
                       TextButton(
                         onPressed: () {
                           context.goNamed(signupRoute.name);

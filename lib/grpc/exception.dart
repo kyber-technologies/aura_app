@@ -9,7 +9,7 @@ class ServiceException implements Exception {
   ServiceException(this.error);
 
   @override
-  String toString() => '${error.code()}: ${error.message}';
+  String toString() => error.message;
 }
 
 extension ErrorExt on ServiceError {

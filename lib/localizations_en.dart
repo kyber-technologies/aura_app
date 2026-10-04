@@ -79,8 +79,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get unexpectedError => 'Unexpected error';
 
   @override
-  String get unauthorizedLoginError =>
-      'Credentials are invalid. Please try again.';
+  String get unauthorizedLoginError => 'Specified invalid user credentials.';
+
+  @override
+  String get rateLimitError =>
+      'You are doing things too fast! Please slow down.';
 
   @override
   String get settings => 'Settings';

@@ -1,43 +1,67 @@
 import 'package:aura_app/ext.dart';
 import 'package:aura_app/grpc/exception.dart';
 import 'package:aura_app/logger.dart';
+import 'package:aura_app/sizer.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-class ErrorDialog extends StatelessWidget {
+class ErrorDialog extends HookConsumerWidget {
   final Exception error;
   final Map<ServiceErrorType, String> translations;
 
   const ErrorDialog(this.error, this.translations, {super.key});
 
   @override
-  Widget build(BuildContext context) {
-    late final String errorDesc;
+  Widget build(BuildContext context, WidgetRef ref) {
+    final Sizer sizer = useSizer(context);
 
-    if (error is ServiceException) {
-      final ServiceException exception = error as ServiceException;
-      final String? translation = translations[exception.error.whichType()];
+    final (String, String) errorDesc = useMemoized(() {
+      if (error is ServiceException) {
+        final ServiceException exception = error as ServiceException;
+        final ServiceErrorType type = exception.error.whichType();
+        final String? translation = type == ServiceErrorType.rateLimit
+            ? context.l10n.rateLimitError
+            : translations[type];
 
-      if (translation != null) {
-        errorDesc = '${exception.error.code()} - $translation';
+        if (translation != null) {
+          return (exception.error.code(), translation);
+        } else {
+          return (exception.error.code(), error.toString());
+        }
       } else {
-        errorDesc = '${exception.error.code()} - $error';
+        return (context.l10n.unexpectedError, error.toString());
       }
-    } else {
-      errorDesc = '${context.l10n.unexpectedError} - $error';
-    }
+    });
 
-    logger.e(errorDesc);
+    useMemoized(() {
+      logger.e('${errorDesc.$1}: ${errorDesc.$2}');
+    });
 
     return Dialog(
-      child: SizedBox(
-        child: Column(
-          children: <Widget>[
-            Text(errorDesc).title(context).error(context),
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: Text(context.l10n.close),
-            ),
-          ],
+      child: sizer.box(
+        w: 200,
+        h: 50,
+        child: Padding(
+          padding: const EdgeInsets.all(10),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Text(errorDesc.$1, textAlign: TextAlign.center)
+                  .bodyLarge(context)
+                  .error(context)
+                  .copyWithStyle(fontWeight: FontWeight.bold),
+              Text(
+                errorDesc.$2,
+                textAlign: TextAlign.center,
+              ).bodyLarge(context).error(context),
+              const SizedBox(height: 16),
+              FilledButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: Text(context.l10n.close),
+              ),
+            ],
+          ),
         ),
       ),
     );
