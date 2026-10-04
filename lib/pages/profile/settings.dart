@@ -414,7 +414,13 @@ class SettingsPage extends HookConsumerWidget {
                                                         resp = await client
                                                             .userService
                                                             .update(
-                                                              UpdateRequest(),
+                                                              UpdateRequest(
+                                                                settings: UserSettings(
+                                                                  resetAlgoTags:
+                                                                      resetAlgoTags
+                                                                          .value,
+                                                                ),
+                                                              ),
                                                             );
 
                                                         if (resp.hasError()) {
