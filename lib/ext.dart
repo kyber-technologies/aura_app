@@ -1,5 +1,6 @@
 import 'package:aura_app/localizations.dart';
 import 'package:aura_app/widgets/copyable.dart';
+import 'package:aura_dart/user.dart';
 import 'package:flutter/material.dart';
 
 extension LocalizeExt on BuildContext {
@@ -465,9 +466,47 @@ extension WidgetExt on Widget {
       CopyableText(textToCopy: text, child: this);
 }
 
-extension FutureExt<T> on Future<T> {
-  Future<(T, U)> join<U>(Future<U> fut) async => (await this, await fut);
+extension UserSettingsExt on UserSettings {
+  bool isDirty({
+    List<String>? resetAlgoTags,
+    bool? allowInvites,
+    double? algoLikeWeight,
+    double? algoDislikeWeight,
+    double? algoCommentWeight,
+    double? algoTimeDecay,
+    bool? notifyInvite,
+    bool? notifyMessage,
+    bool? notifyComment,
+  }) =>
+      this.resetAlgoTags != resetAlgoTags ||
+      this.allowInvites != allowInvites ||
+      this.algoLikeWeight != algoLikeWeight ||
+      this.algoDislikeWeight != algoDislikeWeight ||
+      this.algoCommentWeight != algoCommentWeight ||
+      this.algoTimeDecay != algoTimeDecay ||
+      this.notifyInvite != notifyInvite ||
+      this.notifyMessage != notifyMessage ||
+      this.notifyComment != notifyComment;
 
-  Future<(T, U, V)> join2<U, V>(Future<U> fut1, Future<V> fut2) async =>
-      (await this, await fut1, await fut2);
+  UserSettings update({
+    List<String>? resetAlgoTags,
+    bool? allowInvites,
+    double? algoLikeWeight,
+    double? algoDislikeWeight,
+    double? algoCommentWeight,
+    double? algoTimeDecay,
+    bool? notifyInvite,
+    bool? notifyMessage,
+    bool? notifyComment,
+  }) => UserSettings(
+    resetAlgoTags: resetAlgoTags ?? this.resetAlgoTags,
+    allowInvites: allowInvites ?? this.allowInvites,
+    algoLikeWeight: algoLikeWeight ?? this.algoLikeWeight,
+    algoDislikeWeight: algoDislikeWeight ?? this.algoDislikeWeight,
+    algoCommentWeight: algoCommentWeight ?? this.algoCommentWeight,
+    algoTimeDecay: algoTimeDecay ?? this.algoTimeDecay,
+    notifyInvite: notifyInvite ?? this.notifyInvite,
+    notifyMessage: notifyMessage ?? this.notifyMessage,
+    notifyComment: notifyComment ?? this.notifyComment,
+  );
 }

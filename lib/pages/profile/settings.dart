@@ -53,6 +53,17 @@ class SettingsPage extends HookConsumerWidget {
             storageProvider.notifier,
           );
 
+          logger.i('Updating local settings...');
+          await storage.updateSettings((Settings settings) {
+            if (darkMode.value != null) {
+              settings.darkMode = darkMode.value!;
+            }
+
+            if (animations.value != null) {
+              settings.animations = animations.value!;
+            }
+          });
+
           if (auth.user.settings.allowInvites != allowInvites.value ||
               auth.user.settings.notifyInvite != notifyInvite.value ||
               auth.user.settings.notifyComment != notifyComment.value ||
@@ -61,37 +72,21 @@ class SettingsPage extends HookConsumerWidget {
               auth.user.settings.algoDislikeWeight != algoDislikeWeight.value ||
               auth.user.settings.algoCommentWeight != algoCommentWeight.value ||
               auth.user.settings.algoTimeDecay != algoTimeDecay.value) {
-            logger.i('Updating local settings...');
-            await storage.updateSettings((Settings settings) {
-              if (darkMode.value != null) {
-                settings.darkMode = darkMode.value!;
-              }
-
-              if (animations.value != null) {
-                settings.animations = animations.value!;
-              }
-            });
-
             final UserSettings userSettings = auth.user.settings.deepCopy();
 
             logger.i('Updating user settings...');
             final UpdateResponse resp = await client.userService.update(
               UpdateRequest(
-                settings: userSettings
-                  ..notifyInvite =
-                      notifyInvite.value ?? userSettings.notifyInvite
-                  ..notifyMessage =
-                      notifyMessage.value ?? userSettings.notifyMessage
-                  ..notifyComment =
-                      notifyComment.value ?? userSettings.notifyComment
-                  ..algoLikeWeight =
-                      algoLikeWeight.value ?? userSettings.algoLikeWeight
-                  ..algoDislikeWeight =
-                      algoDislikeWeight.value ?? userSettings.algoDislikeWeight
-                  ..algoCommentWeight =
-                      algoCommentWeight.value ?? userSettings.algoCommentWeight
-                  ..algoTimeDecay =
-                      algoTimeDecay.value ?? userSettings.algoTimeDecay,
+                settings: userSettings.update(
+                  allowInvites: allowInvites.value,
+                  algoLikeWeight: algoLikeWeight.value,
+                  algoDislikeWeight: algoDislikeWeight.value,
+                  algoCommentWeight: algoCommentWeight.value,
+                  algoTimeDecay: algoTimeDecay.value,
+                  notifyInvite: notifyInvite.value,
+                  notifyMessage: notifyMessage.value,
+                  notifyComment: notifyComment.value,
+                ),
               ),
               options: auth.buildOptions(),
             );
@@ -110,7 +105,7 @@ class SettingsPage extends HookConsumerWidget {
         icon: const Icon(Icons.save),
       ),
       bottomNavigationBar: const Navbar(),
-      body: Loader<(Settings, AuthService)>(localSettings.join(authFut), (
+      body: Loader<(Settings, AuthService)>((localSettings, authFut).wait, (
         BuildContext context,
         WidgetRef ref,
         (Settings, AuthService) result,
@@ -399,11 +394,6 @@ class SettingsPage extends HookConsumerWidget {
                                               actions: <Widget>[
                                                 FilledButton.icon(
                                                   onPressed: () async {
-                                                    if (context.mounted) {
-                                                      Navigator.pop(context);
-                                                      Navigator.pop(context);
-                                                    }
-
                                                     final AuraClient
                                                     client = await ref.read(
                                                       auraClientProvider.future,
@@ -417,15 +407,24 @@ class SettingsPage extends HookConsumerWidget {
                                                         .userService
                                                         .update(
                                                           UpdateRequest(
-                                                            settings: UserSettings(
-                                                              resetAlgoTags:
-                                                                  resetAlgoTags
-                                                                      .value,
-                                                            ),
+                                                            settings: auth
+                                                                .user
+                                                                .settings
+                                                                .update(
+                                                                  resetAlgoTags:
+                                                                      resetAlgoTags
+                                                                          .value
+                                                                          .toList(),
+                                                                ),
                                                           ),
                                                           options: auth
                                                               .buildOptions(),
                                                         );
+
+                                                    if (context.mounted) {
+                                                      Navigator.pop(context);
+                                                      Navigator.pop(context);
+                                                    }
 
                                                     if (resp.hasError() &&
                                                         context.mounted) {

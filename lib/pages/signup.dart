@@ -44,7 +44,7 @@ class SignupPage extends HookConsumerWidget {
 
     return Scaffold(
       bottomNavigationBar: const Navbar(),
-      body: Loader<(AuthService, AuraClient)>(authFut.join(clientFut), (
+      body: Loader<(AuthService, AuraClient)>((authFut, clientFut).wait, (
         BuildContext context,
         WidgetRef ref,
         (AuthService, AuraClient) loaderResult,

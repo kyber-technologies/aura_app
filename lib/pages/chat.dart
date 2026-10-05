@@ -1,5 +1,4 @@
 import 'package:aura_app/chat.dart';
-import 'package:aura_app/ext.dart';
 import 'package:aura_app/grpc/auth.dart';
 import 'package:aura_app/grpc/client.dart';
 import 'package:aura_app/storage.dart';
@@ -29,14 +28,14 @@ class ChatPage extends HookConsumerWidget {
 
     return Scaffold(
       bottomNavigationBar: const Navbar(),
-      body: Loader<((AuthService, Storage), AuraClient)>(
-        authFut.join(storageFut).join(clientFut),
+      body: Loader<(AuthService, Storage, AuraClient)>(
+        (authFut, storageFut, clientFut).wait,
         (
           BuildContext context,
           WidgetRef ref,
-          ((AuthService, Storage), AuraClient) loaderResult,
+          (AuthService, Storage, AuraClient) loaderResult,
         ) {
-          final ((AuthService auth, Storage storage), AuraClient client) =
+          final (AuthService auth, Storage storage, AuraClient client) =
               loaderResult;
 
           return Row(
