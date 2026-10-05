@@ -382,82 +382,13 @@ class SettingsPage extends HookConsumerWidget {
                                         if (resetAlgoTags.value.isNotEmpty) {
                                           await showDialog<void>(
                                             context: context,
-                                            builder: (BuildContext context) => AlertDialog(
-                                              title: Text(
-                                                context.l10n.resetAlgoConfirm,
-                                              ).titleLarge(context),
-                                              content: Text(
-                                                context
-                                                    .l10n
-                                                    .resetAlgoConfirmBody,
-                                              ).title(context),
-                                              actions: <Widget>[
-                                                FilledButton.icon(
-                                                  onPressed: () async {
-                                                    final AuraClient
-                                                    client = await ref.read(
-                                                      auraClientProvider.future,
-                                                    );
-
-                                                    logger.i(
-                                                      'Resetting user algo...',
-                                                    );
-                                                    final UpdateResponse
-                                                    resp = await client
-                                                        .userService
-                                                        .update(
-                                                          UpdateRequest(
-                                                            settings: auth
-                                                                .user
-                                                                .settings
-                                                                .update(
-                                                                  resetAlgoTags:
-                                                                      resetAlgoTags
-                                                                          .value
-                                                                          .toList(),
-                                                                ),
-                                                          ),
-                                                          options: auth
-                                                              .buildOptions(),
-                                                        );
-
-                                                    if (context.mounted) {
-                                                      Navigator.pop(context);
-                                                      Navigator.pop(context);
-                                                    }
-
-                                                    if (resp.hasError() &&
-                                                        context.mounted) {
-                                                      logger.e(
-                                                        'Failed to reset user algo: ${resp.error}',
-                                                      );
-                                                      await ErrorDialog(
-                                                        ServiceException(
-                                                          resp.error,
-                                                        ),
-                                                        Map<
-                                                          ServiceErrorType,
-                                                          String
-                                                        >.identity(),
-                                                      ).show(context);
-                                                    }
-
-                                                    resetAlgoTags.value.clear();
-                                                  },
-                                                  label: Text(context.l10n.yes),
-                                                  icon: const Icon(Icons.check),
+                                            builder: (BuildContext context) =>
+                                                _buildResetAlgoDialog(
+                                                  context,
+                                                  ref,
+                                                  auth,
+                                                  resetAlgoTags,
                                                 ),
-                                                FilledButton.icon(
-                                                  onPressed: () {
-                                                    resetAlgoTags.value.clear();
-                                                    Navigator.pop(context);
-                                                    Navigator.pop(context);
-                                                  },
-                                                  label: Text(context.l10n.no),
-                                                  icon: const Icon(Icons.close),
-                                                ),
-                                              ],
-                                            ),
                                           );
                                         }
                                       },
@@ -485,3 +416,56 @@ class SettingsPage extends HookConsumerWidget {
     );
   }
 }
+
+AlertDialog _buildResetAlgoDialog(
+  BuildContext context,
+  WidgetRef ref,
+  AuthService auth,
+  ValueNotifier<Set<String>> resetAlgoTags,
+) => AlertDialog(
+  title: Text(context.l10n.resetAlgoConfirm).titleLarge(context),
+  content: Text(context.l10n.resetAlgoConfirmBody).title(context),
+  actions: <Widget>[
+    FilledButton.icon(
+      onPressed: () async {
+        final AuraClient client = await ref.read(auraClientProvider.future);
+
+        logger.i('Resetting user algo...');
+        final UpdateResponse resp = await client.userService.update(
+          UpdateRequest(
+            settings: auth.user.settings.update(
+              resetAlgoTags: resetAlgoTags.value.toList(),
+            ),
+          ),
+          options: auth.buildOptions(),
+        );
+
+        if (context.mounted) {
+          Navigator.pop(context);
+          Navigator.pop(context);
+        }
+
+        if (resp.hasError() && context.mounted) {
+          logger.e('Failed to reset user algo: ${resp.error}');
+          await ErrorDialog(
+            ServiceException(resp.error),
+            Map<ServiceErrorType, String>.identity(),
+          ).show(context);
+        }
+
+        resetAlgoTags.value.clear();
+      },
+      label: Text(context.l10n.yes),
+      icon: const Icon(Icons.check),
+    ),
+    FilledButton.icon(
+      onPressed: () {
+        resetAlgoTags.value.clear();
+        Navigator.pop(context);
+        Navigator.pop(context);
+      },
+      label: Text(context.l10n.no),
+      icon: const Icon(Icons.close),
+    ),
+  ],
+);
