@@ -4,7 +4,6 @@ import 'package:aura_app/grpc/client.dart';
 import 'package:aura_app/grpc/exception.dart';
 import 'package:aura_app/logger.dart';
 import 'package:aura_app/router.dart';
-import 'package:aura_app/sizer.dart';
 import 'package:aura_app/storage.dart';
 import 'package:aura_app/utils.dart';
 import 'package:aura_app/widgets/error_dialog.dart';
@@ -23,7 +22,6 @@ class SignupPage extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final Sizer sizer = useSizer(context);
     final ValueNotifier<GlobalKey<FormState>> formKey = useState(GlobalKey());
     final Future<AuthService> authFut = ref.watch(authProvider.future);
     final Future<AuraClient> clientFut = ref.watch(auraClientProvider.future);
@@ -54,15 +52,15 @@ class SignupPage extends HookConsumerWidget {
         return Center(
           child: Card(
             margin: const EdgeInsets.symmetric(horizontal: 25),
-            child: sizer.padding(
-              horizontal: 35,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 35),
               child: Form(
                 key: formKey.value,
                 child: SingleChildScrollView(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
-                      sizer.box(h: 20),
+                      const SizedBox(height: 20),
                       Text(context.l10n.signup).headline(context),
                       TextFormField(
                         controller: useridController,
@@ -225,42 +223,17 @@ class SignupPage extends HookConsumerWidget {
                                 );
                               }
 
-                              String? token;
-
-                              if (context.mounted) {
-                                await showDialog<void>(
-                                  context: context,
-                                  builder: (BuildContext context) =>
-                                      SimpleDialog(
-                                        title: Text(
-                                          context.l10n.verifyEmailBody(
+                              final String? token = context.mounted
+                                  ? await showDialog<String>(
+                                      context: context,
+                                      builder: (BuildContext context) =>
+                                          _buildVerifyDialog(
+                                            context,
                                             emailController.text,
+                                            emailTokenController,
                                           ),
-                                        ),
-                                        children: <Widget>[
-                                          sizer.padding(
-                                            horizontal: 10,
-                                            child: TextFormField(
-                                              controller: emailTokenController,
-                                              decoration: InputDecoration(
-                                                label: Text(
-                                                  context.l10n.emailTokenLabel,
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                          TextButton(
-                                            onPressed: () {
-                                              token = emailTokenController.text;
-
-                                              context.pop();
-                                            },
-                                            child: Text(context.l10n.submit),
-                                          ),
-                                        ],
-                                      ),
-                                );
-                              }
+                                    )
+                                  : null;
 
                               if (token != null) {
                                 final CreateResponse createUserResponse =
@@ -328,3 +301,26 @@ class SignupPage extends HookConsumerWidget {
     );
   }
 }
+
+SimpleDialog _buildVerifyDialog(
+  BuildContext context,
+  String email,
+  TextEditingController emailTokenController,
+) => SimpleDialog(
+  title: Text(context.l10n.verifyEmailBody(email)),
+  children: <Widget>[
+    Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 10),
+      child: TextFormField(
+        controller: emailTokenController,
+        decoration: InputDecoration(label: Text(context.l10n.emailTokenLabel)),
+      ),
+    ),
+    TextButton(
+      onPressed: () {
+        context.pop(<String>[emailTokenController.text]);
+      },
+      child: Text(context.l10n.submit),
+    ),
+  ],
+);

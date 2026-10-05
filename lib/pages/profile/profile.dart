@@ -3,7 +3,6 @@ import 'package:aura_app/ext.dart';
 import 'package:aura_app/grpc/auth.dart';
 import 'package:aura_app/info.dart';
 import 'package:aura_app/router.dart';
-import 'package:aura_app/sizer.dart';
 import 'package:aura_app/widgets/avatar.dart';
 import 'package:aura_app/widgets/loader.dart';
 import 'package:aura_app/widgets/navbar.dart';
@@ -16,7 +15,6 @@ class ProfilePage extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final Sizer sizer = useSizer(context);
     final Future<AuthService> authFut = ref.watch(authProvider.future);
 
     return Scaffold(
@@ -30,11 +28,7 @@ class ProfilePage extends HookConsumerWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
-                  Avatar(
-                    auth.user.userId,
-                    width: sizer.sp(25),
-                    height: sizer.sp(25),
-                  ),
+                  Avatar(auth.user.userId, width: 100, height: 100),
                   const SizedBox(height: 5),
                   Text(
                     auth.user.username,
@@ -94,13 +88,9 @@ class ProfilePage extends HookConsumerWidget {
                         context: context,
                         applicationName: 'Aura',
                         applicationVersion: 'v${packageInfo.version}',
-                        applicationIcon: sizer.padding(
-                          all: 5,
-                          child: Image.asset(
-                            iconPath,
-                            width: sizer.sp(25),
-                            height: sizer.sp(25),
-                          ),
+                        applicationIcon: Padding(
+                          padding: const EdgeInsets.all(10),
+                          child: Image.asset(iconPath, width: 75, height: 75),
                         ),
                         applicationLegalese:
                             'Copyright (c) Mikail Plotzky 2026 '

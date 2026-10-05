@@ -3,7 +3,6 @@ import 'package:aura_app/grpc/auth.dart';
 import 'package:aura_app/grpc/exception.dart';
 import 'package:aura_app/logger.dart';
 import 'package:aura_app/router.dart';
-import 'package:aura_app/sizer.dart';
 import 'package:aura_app/widgets/error_dialog.dart';
 import 'package:aura_app/widgets/loader.dart';
 import 'package:aura_app/widgets/navbar.dart';
@@ -17,7 +16,6 @@ class LoginPage extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final Sizer sizer = useSizer(context);
     final ValueNotifier<GlobalKey<FormState>> formKey = useState(GlobalKey());
     final Future<AuthService> authFut = ref.watch(authProvider.future);
 
@@ -33,15 +31,15 @@ class LoginPage extends HookConsumerWidget {
         (BuildContext context, WidgetRef ref, AuthService auth) => Center(
           child: Card(
             margin: const EdgeInsets.symmetric(horizontal: 25),
-            child: sizer.padding(
-              horizontal: 35,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 35),
               child: Form(
                 key: formKey.value,
                 child: SingleChildScrollView(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
-                      sizer.box(h: 20),
+                      const SizedBox(height: 20),
                       Text(context.l10n.login).headline(context),
                       TextFormField(
                         controller: useridController,

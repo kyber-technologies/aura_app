@@ -3,7 +3,6 @@ import 'package:aura_app/grpc/auth.dart';
 import 'package:aura_app/grpc/client.dart';
 import 'package:aura_app/grpc/exception.dart';
 import 'package:aura_app/logger.dart';
-import 'package:aura_app/sizer.dart';
 import 'package:aura_app/storage.dart';
 import 'package:aura_app/widgets/error_dialog.dart';
 import 'package:aura_app/widgets/loader.dart';
@@ -21,8 +20,6 @@ class SettingsPage extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final Sizer sizer = useSizer(context);
-
     final Future<Settings> localSettings = ref.watch(
       storageProvider.selectAsync((Storage storage) => storage.settings),
     );
@@ -129,7 +126,6 @@ class SettingsPage extends HookConsumerWidget {
                       Tile(
                         title: Text(context.l10n.allowInvites).title(context),
                         tooltip: context.l10n.allowInvitesDesc,
-                        width: sizer.wp(0.9),
                         content: Checkbox(
                           value:
                               allowInvites.value ??
@@ -154,7 +150,6 @@ class SettingsPage extends HookConsumerWidget {
                       Tile(
                         title: Text(context.l10n.darkMode).title(context),
                         tooltip: context.l10n.darkModeDesc,
-                        width: sizer.wp(0.9),
                         content: Checkbox(
                           value: darkMode.value ?? settings.darkMode,
                           onChanged: (bool? value) {
@@ -165,7 +160,6 @@ class SettingsPage extends HookConsumerWidget {
                       Tile(
                         title: Text(context.l10n.animations).title(context),
                         tooltip: context.l10n.animationsDesc,
-                        width: sizer.wp(0.9),
                         content: Checkbox(
                           value: animations.value ?? settings.animations,
                           onChanged: (bool? value) {
@@ -187,7 +181,6 @@ class SettingsPage extends HookConsumerWidget {
                       Tile(
                         title: Text(context.l10n.notifyInvites).title(context),
                         tooltip: context.l10n.notifyInvitesDesc,
-                        width: sizer.wp(0.9),
                         content: Checkbox(
                           value:
                               notifyInvite.value ??
@@ -200,7 +193,6 @@ class SettingsPage extends HookConsumerWidget {
                       Tile(
                         title: Text(context.l10n.notifyMessages).title(context),
                         tooltip: context.l10n.notifyMessagesDesc,
-                        width: sizer.wp(0.9),
                         content: Checkbox(
                           value:
                               notifyMessage.value ??
@@ -213,7 +205,6 @@ class SettingsPage extends HookConsumerWidget {
                       Tile(
                         title: Text(context.l10n.notifyComments).title(context),
                         tooltip: context.l10n.notifyCommentsDesc,
-                        width: sizer.wp(0.9),
                         content: Checkbox(
                           value:
                               notifyComment.value ??
@@ -237,7 +228,6 @@ class SettingsPage extends HookConsumerWidget {
                       Tile(
                         title: Text(context.l10n.algoLikeWeight).title(context),
                         tooltip: context.l10n.algoLikeWeightDesc,
-                        width: sizer.wp(0.9),
                         content: Row(
                           children: <Widget>[
                             Text(
@@ -245,9 +235,7 @@ class SettingsPage extends HookConsumerWidget {
                                       auth.user.settings.algoLikeWeight)
                                   .toStringAsFixed(2),
                             ),
-                            sizer.box(
-                              w: 100,
-                              h: 10,
+                            Expanded(
                               child: Slider(
                                 divisions: 20,
                                 value:
@@ -267,7 +255,6 @@ class SettingsPage extends HookConsumerWidget {
                           context.l10n.algoDislikeWeight,
                         ).title(context),
                         tooltip: context.l10n.algoDislikeWeightDesc,
-                        width: sizer.wp(0.9),
                         content: Row(
                           children: <Widget>[
                             Text(
@@ -275,9 +262,7 @@ class SettingsPage extends HookConsumerWidget {
                                       auth.user.settings.algoDislikeWeight)
                                   .toStringAsFixed(2),
                             ),
-                            sizer.box(
-                              w: 100,
-                              h: 10,
+                            Expanded(
                               child: Slider(
                                 divisions: 20,
                                 value:
@@ -297,7 +282,6 @@ class SettingsPage extends HookConsumerWidget {
                           context.l10n.algoCommentWeight,
                         ).title(context),
                         tooltip: context.l10n.algoCommentWeightDesc,
-                        width: sizer.wp(0.9),
                         content: Row(
                           children: <Widget>[
                             Text(
@@ -305,9 +289,7 @@ class SettingsPage extends HookConsumerWidget {
                                       auth.user.settings.algoCommentWeight)
                                   .toStringAsFixed(2),
                             ),
-                            sizer.box(
-                              w: 100,
-                              h: 10,
+                            Expanded(
                               child: Slider(
                                 divisions: 20,
                                 value:
@@ -325,7 +307,6 @@ class SettingsPage extends HookConsumerWidget {
                       Tile(
                         title: Text(context.l10n.algoTimeDecay).title(context),
                         tooltip: context.l10n.algoTimeDecayDesc,
-                        width: sizer.wp(0.9),
                         content: Row(
                           children: <Widget>[
                             Text(
@@ -333,9 +314,7 @@ class SettingsPage extends HookConsumerWidget {
                                       auth.user.settings.algoTimeDecay)
                                   .toStringAsFixed(2),
                             ),
-                            sizer.box(
-                              w: 100,
-                              h: 10,
+                            Expanded(
                               child: Slider(
                                 divisions: 20,
                                 value:
@@ -354,50 +333,13 @@ class SettingsPage extends HookConsumerWidget {
                         onPressed: () async {
                           await showDialog<void>(
                             context: context,
-                            builder: (BuildContext context) => Dialog(
-                              child: sizer.box(
-                                w: 125,
-                                h: 60,
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: <Widget>[
-                                    Text(
-                                      context.l10n.tagsDesc,
-                                    ).titleLarge(context),
-                                    const SizedBox(height: 15),
-                                    TagList(
-                                      onChanged: (Set<String> tags) {
-                                        resetAlgoTags.value = tags;
-                                      },
-                                    ),
-                                    const SizedBox(height: 7.5),
-                                    if (resetAlgoTags.value.isEmpty)
-                                      Text(
-                                        context.l10n.noTagsSpecified,
-                                        textAlign: TextAlign.center,
-                                      ).title(context).error(context),
-                                    const SizedBox(height: 25),
-                                    FilledButton(
-                                      onPressed: () async {
-                                        if (resetAlgoTags.value.isNotEmpty) {
-                                          await showDialog<void>(
-                                            context: context,
-                                            builder: (BuildContext context) =>
-                                                _buildResetAlgoDialog(
-                                                  context,
-                                                  ref,
-                                                  auth,
-                                                  resetAlgoTags,
-                                                ),
-                                          );
-                                        }
-                                      },
-                                      child: Text(context.l10n.resetAlgo),
-                                    ),
-                                  ],
+                            builder: (BuildContext context) =>
+                                _buildResetAlgoDialog(
+                                  context,
+                                  ref,
+                                  auth,
+                                  resetAlgoTags,
                                 ),
-                              ),
-                            ),
                           );
                         },
                         label: Text(context.l10n.resetAlgo),
@@ -417,7 +359,54 @@ class SettingsPage extends HookConsumerWidget {
   }
 }
 
-AlertDialog _buildResetAlgoDialog(
+Dialog _buildResetAlgoDialog(
+  BuildContext context,
+  WidgetRef ref,
+  AuthService auth,
+  ValueNotifier<Set<String>> resetAlgoTags,
+) => Dialog(
+  child: SizedBox(
+    width: 450,
+    height: 200,
+    child: Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: <Widget>[
+        Text(context.l10n.tagsDesc).titleLarge(context),
+        const SizedBox(height: 15),
+        TagList(
+          onChanged: (Set<String> tags) {
+            resetAlgoTags.value = tags;
+          },
+        ),
+        const SizedBox(height: 7.5),
+        if (resetAlgoTags.value.isEmpty)
+          Text(
+            context.l10n.noTagsSpecified,
+            textAlign: TextAlign.center,
+          ).title(context).error(context),
+        const SizedBox(height: 25),
+        FilledButton(
+          onPressed: () async {
+            if (resetAlgoTags.value.isNotEmpty) {
+              await showDialog<void>(
+                context: context,
+                builder: (BuildContext context) => _buildConfirmResetAlgoDialog(
+                  context,
+                  ref,
+                  auth,
+                  resetAlgoTags,
+                ),
+              );
+            }
+          },
+          child: Text(context.l10n.resetAlgo),
+        ),
+      ],
+    ),
+  ),
+);
+
+AlertDialog _buildConfirmResetAlgoDialog(
   BuildContext context,
   WidgetRef ref,
   AuthService auth,

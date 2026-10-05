@@ -4,14 +4,12 @@ class Tile extends StatelessWidget {
   final String? tooltip;
   final Widget title;
   final Widget content;
-  final double? width;
   final double? spacing;
 
   const Tile({
     required this.title,
     required this.content,
     this.tooltip,
-    this.width,
     this.spacing,
     super.key,
   });
@@ -22,18 +20,26 @@ class Tile extends StatelessWidget {
         ? Tooltip(message: tooltip, child: title)
         : title;
 
-    final Widget row = Row(
-      children: <Widget>[
-        const SizedBox(width: 15),
-        Expanded(
-          child: Align(alignment: Alignment.centerLeft, child: titleWidget),
-        ),
-        if (spacing != null) SizedBox(width: spacing),
-        content,
-        if (spacing != null) SizedBox(width: spacing),
-      ],
-    );
+    return Padding(
+      padding: const EdgeInsets.only(left: 15),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints.expand(width: 750, height: 50),
+        child: Row(
+          children: <Widget>[
+            Expanded(
+              flex: 2,
+              child: Align(alignment: Alignment.centerLeft, child: titleWidget),
+            ),
 
-    return width == null ? row : SizedBox(width: width, child: row);
+            SizedBox(width: spacing),
+
+            Expanded(
+              flex: 3,
+              child: Align(alignment: Alignment.centerRight, child: content),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }

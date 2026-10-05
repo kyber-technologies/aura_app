@@ -1,5 +1,4 @@
 import 'package:aura_app/grpc/resources.dart';
-import 'package:aura_app/sizer.dart';
 import 'package:aura_app/widgets/loader.dart';
 import 'package:aura_dart/resource.dart';
 import 'package:flutter/material.dart';
@@ -24,7 +23,6 @@ class Avatar extends HookConsumerWidget {
     final Color color = useMemoized(
       () => Theme.of(context).colorScheme.primary,
     );
-    final Sizer sizer = useSizer(context);
 
     final Future<Resource> avatarFut = ref
         .read(
@@ -48,7 +46,7 @@ class Avatar extends HookConsumerWidget {
           border: Border.all(color: color, width: 2.5),
         ),
         child: Padding(
-          padding: EdgeInsets.all(sizer.sp(2.5)),
+          padding: const EdgeInsets.all(3),
           child: Loader<Resource>(
             avatarFut,
             (BuildContext context, WidgetRef ref, Resource avatar) =>
