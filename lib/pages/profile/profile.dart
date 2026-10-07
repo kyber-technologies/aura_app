@@ -1,6 +1,6 @@
 import 'package:aura_app/assets.dart';
 import 'package:aura_app/ext/common.dart';
-import 'package:aura_app/ext/text.dart';
+import 'package:aura_app/ext/widgets.dart';
 import 'package:aura_app/grpc/auth.dart';
 import 'package:aura_app/info.dart';
 import 'package:aura_app/router.dart';

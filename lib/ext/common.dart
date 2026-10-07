@@ -1,6 +1,4 @@
-
 import 'package:aura_app/localizations.dart';
-import 'package:aura_app/widgets/copyable.dart';
 import 'package:flutter/material.dart';
 
 extension LocalizeExt on BuildContext {
@@ -13,11 +11,4 @@ extension LocalizeExt on BuildContext {
 
     return locales;
   }
-}
-
-extension WidgetExt on Widget {
-  SelectionArea selectable() => SelectionArea(child: this);
-
-  CopyableText copyable(String text) =>
-      CopyableText(textToCopy: text, child: this);
 }

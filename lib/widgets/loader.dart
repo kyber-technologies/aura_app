@@ -1,5 +1,4 @@
-
-import 'package:aura_app/ext/text.dart';
+import 'package:aura_app/ext/widgets.dart';
 import 'package:aura_app/logger.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';

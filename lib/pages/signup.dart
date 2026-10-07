@@ -1,5 +1,5 @@
 import 'package:aura_app/ext/common.dart';
-import 'package:aura_app/ext/text.dart';
+import 'package:aura_app/ext/widgets.dart';
 import 'package:aura_app/grpc/auth.dart';
 import 'package:aura_app/grpc/client.dart';
 import 'package:aura_app/grpc/exception.dart';

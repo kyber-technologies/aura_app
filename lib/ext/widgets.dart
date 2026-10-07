@@ -1,5 +1,13 @@
+import 'package:aura_app/widgets/copyable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
+
+extension WidgetExt on Widget {
+  SelectionArea selectable() => SelectionArea(child: this);
+
+  CopyableText copyable(String text) =>
+      CopyableText(textToCopy: text, child: this);
+}
 
 extension TextExt on Text {
   Text copyWithStyle({

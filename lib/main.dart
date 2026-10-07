@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:aura_app/ext/text.dart';
+import 'package:aura_app/ext/widgets.dart';
 import 'package:aura_app/info.dart';
 import 'package:aura_app/localizations.dart';
 import 'package:aura_app/logger.dart';
