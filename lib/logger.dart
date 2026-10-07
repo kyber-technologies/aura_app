@@ -13,6 +13,7 @@ Future<void> initLogger() async {
     defaultValue: kDebugMode ? 'debug' : 'info',
   );
 
+  // TODO: Rework this.
   final String logDir = joinPaths(
     (await getApplicationDocumentsDirectory()).path,
     <String>['aura', 'logs'],

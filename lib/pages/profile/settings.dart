@@ -1,4 +1,6 @@
-import 'package:aura_app/ext.dart';
+import 'package:aura_app/ext/common.dart';
+import 'package:aura_app/ext/grpc.dart';
+import 'package:aura_app/ext/text.dart';
 import 'package:aura_app/grpc/auth.dart';
 import 'package:aura_app/grpc/client.dart';
 import 'package:aura_app/grpc/exception.dart';
@@ -7,7 +9,6 @@ import 'package:aura_app/storage.dart';
 import 'package:aura_app/widgets/error_dialog.dart';
 import 'package:aura_app/widgets/loader.dart';
 import 'package:aura_app/widgets/navbar.dart';
-import 'package:aura_app/widgets/scrollview.dart';
 import 'package:aura_app/widgets/tag_list.dart';
 import 'package:aura_app/widgets/tile.dart';
 import 'package:aura_dart/user.dart';
@@ -43,61 +44,20 @@ class SettingsPage extends HookConsumerWidget {
 
     return Scaffold(
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () async {
-          final AuraClient client = await ref.read(auraClientProvider.future);
-          final AuthService auth = await ref.read(authProvider.future);
-          final StorageNotifier storage = await ref.read(
-            storageProvider.notifier,
-          );
-
-          logger.i('Updating local settings...');
-          await storage.updateSettings((Settings settings) {
-            if (darkMode.value != null) {
-              settings.darkMode = darkMode.value!;
-            }
-
-            if (animations.value != null) {
-              settings.animations = animations.value!;
-            }
-          });
-
-          if (auth.user.settings.allowInvites != allowInvites.value ||
-              auth.user.settings.notifyInvite != notifyInvite.value ||
-              auth.user.settings.notifyComment != notifyComment.value ||
-              auth.user.settings.notifyMessage != notifyMessage.value ||
-              auth.user.settings.algoLikeWeight != algoLikeWeight.value ||
-              auth.user.settings.algoDislikeWeight != algoDislikeWeight.value ||
-              auth.user.settings.algoCommentWeight != algoCommentWeight.value ||
-              auth.user.settings.algoTimeDecay != algoTimeDecay.value) {
-            final UserSettings userSettings = auth.user.settings.deepCopy();
-
-            logger.i('Updating user settings...');
-            final UpdateResponse resp = await client.userService.update(
-              UpdateRequest(
-                settings: userSettings.update(
-                  allowInvites: allowInvites.value,
-                  algoLikeWeight: algoLikeWeight.value,
-                  algoDislikeWeight: algoDislikeWeight.value,
-                  algoCommentWeight: algoCommentWeight.value,
-                  algoTimeDecay: algoTimeDecay.value,
-                  notifyInvite: notifyInvite.value,
-                  notifyMessage: notifyMessage.value,
-                  notifyComment: notifyComment.value,
-                ),
-              ),
-              options: auth.buildOptions(),
-            );
-
-            if (resp.hasError() && context.mounted) {
-              await ErrorDialog(
-                ServiceException(resp.error),
-                Map<ServiceErrorType, String>.identity(),
-              ).show(context);
-            }
-
-            await auth.refresh();
-          }
-        },
+        onPressed: () async => _saveSettings(
+          context,
+          ref,
+          darkMode: darkMode.value,
+          animations: animations.value,
+          allowInvites: allowInvites.value,
+          algoLikeWeight: algoLikeWeight.value,
+          algoDislikeWeight: algoDislikeWeight.value,
+          algoCommentWeight: algoCommentWeight.value,
+          algoTimeDecay: algoTimeDecay.value,
+          notifyInvite: notifyInvite.value,
+          notifyMessage: notifyMessage.value,
+          notifyComment: notifyComment.value,
+        ),
         label: Text(context.l10n.save),
         icon: const Icon(Icons.save),
       ),
@@ -111,246 +71,257 @@ class SettingsPage extends HookConsumerWidget {
         final AuthService auth = result.$2;
 
         return Center(
-          child: FullScrollView(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                const SizedBox(height: 25),
-                // GENERAL
-                Card(
-                  child: Column(
-                    children: <Widget>[
-                      const SizedBox(height: 20),
-                      Text(context.l10n.general).headlineSmall(context),
-                      const SizedBox(height: 5),
-                      Tile(
-                        title: Text(context.l10n.allowInvites).title(context),
-                        tooltip: context.l10n.allowInvitesDesc,
-                        content: Checkbox(
-                          value:
-                              allowInvites.value ??
-                              auth.user.settings.allowInvites,
-                          onChanged: (bool? value) {
-                            allowInvites.value = value;
-                          },
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(15),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  // GENERAL
+                  Card(
+                    child: Column(
+                      children: <Widget>[
+                        const SizedBox(height: 20),
+                        Text(context.l10n.general).headlineSmall(context),
+                        const SizedBox(height: 5),
+                        Tile(
+                          title: Text(context.l10n.allowInvites).title(context),
+                          tooltip: context.l10n.allowInvitesDesc,
+                          content: Checkbox(
+                            value:
+                                allowInvites.value ??
+                                auth.user.settings.allowInvites,
+                            onChanged: (bool? value) {
+                              allowInvites.value = value;
+                            },
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 5),
-                    ],
+                        const SizedBox(height: 5),
+                      ],
+                    ),
                   ),
-                ),
-                const SizedBox(height: 25),
-                // APPEARANCE
-                Card(
-                  child: Column(
-                    children: <Widget>[
-                      const SizedBox(height: 20),
-                      Text(context.l10n.appearance).headlineSmall(context),
-                      const SizedBox(height: 5),
-                      Tile(
-                        title: Text(context.l10n.darkMode).title(context),
-                        tooltip: context.l10n.darkModeDesc,
-                        content: Checkbox(
-                          value: darkMode.value ?? settings.darkMode,
-                          onChanged: (bool? value) {
-                            darkMode.value = value;
-                          },
+                  const SizedBox(height: 25),
+                  // APPEARANCE
+                  Card(
+                    child: Column(
+                      children: <Widget>[
+                        const SizedBox(height: 20),
+                        Text(context.l10n.appearance).headlineSmall(context),
+                        const SizedBox(height: 5),
+                        Tile(
+                          title: Text(context.l10n.darkMode).title(context),
+                          tooltip: context.l10n.darkModeDesc,
+                          content: Checkbox(
+                            value: darkMode.value ?? settings.darkMode,
+                            onChanged: (bool? value) {
+                              darkMode.value = value;
+                            },
+                          ),
                         ),
-                      ),
-                      Tile(
-                        title: Text(context.l10n.animations).title(context),
-                        tooltip: context.l10n.animationsDesc,
-                        content: Checkbox(
-                          value: animations.value ?? settings.animations,
-                          onChanged: (bool? value) {
-                            animations.value = value;
-                          },
+                        Tile(
+                          title: Text(context.l10n.animations).title(context),
+                          tooltip: context.l10n.animationsDesc,
+                          content: Checkbox(
+                            value: animations.value ?? settings.animations,
+                            onChanged: (bool? value) {
+                              animations.value = value;
+                            },
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
-                const SizedBox(height: 25),
-                // NOTIFICATIONS
-                Card(
-                  child: Column(
-                    children: <Widget>[
-                      const SizedBox(height: 20),
-                      Text(context.l10n.notifications).headlineSmall(context),
-                      const SizedBox(height: 5),
-                      Tile(
-                        title: Text(context.l10n.notifyInvites).title(context),
-                        tooltip: context.l10n.notifyInvitesDesc,
-                        content: Checkbox(
-                          value:
-                              notifyInvite.value ??
-                              auth.user.settings.notifyInvite,
-                          onChanged: (bool? value) {
-                            notifyInvite.value = value;
-                          },
+                  const SizedBox(height: 25),
+                  // NOTIFICATIONS
+                  Card(
+                    child: Column(
+                      children: <Widget>[
+                        const SizedBox(height: 20),
+                        Text(context.l10n.notifications).headlineSmall(context),
+                        const SizedBox(height: 5),
+                        Tile(
+                          title: Text(
+                            context.l10n.notifyInvites,
+                          ).title(context),
+                          tooltip: context.l10n.notifyInvitesDesc,
+                          content: Checkbox(
+                            value:
+                                notifyInvite.value ??
+                                auth.user.settings.notifyInvite,
+                            onChanged: (bool? value) {
+                              notifyInvite.value = value;
+                            },
+                          ),
                         ),
-                      ),
-                      Tile(
-                        title: Text(context.l10n.notifyMessages).title(context),
-                        tooltip: context.l10n.notifyMessagesDesc,
-                        content: Checkbox(
-                          value:
-                              notifyMessage.value ??
-                              auth.user.settings.notifyMessage,
-                          onChanged: (bool? value) {
-                            notifyMessage.value = value;
-                          },
+                        Tile(
+                          title: Text(
+                            context.l10n.notifyMessages,
+                          ).title(context),
+                          tooltip: context.l10n.notifyMessagesDesc,
+                          content: Checkbox(
+                            value:
+                                notifyMessage.value ??
+                                auth.user.settings.notifyMessage,
+                            onChanged: (bool? value) {
+                              notifyMessage.value = value;
+                            },
+                          ),
                         ),
-                      ),
-                      Tile(
-                        title: Text(context.l10n.notifyComments).title(context),
-                        tooltip: context.l10n.notifyCommentsDesc,
-                        content: Checkbox(
-                          value:
-                              notifyComment.value ??
-                              auth.user.settings.notifyComment,
-                          onChanged: (bool? value) {
-                            notifyComment.value = value;
-                          },
+                        Tile(
+                          title: Text(
+                            context.l10n.notifyComments,
+                          ).title(context),
+                          tooltip: context.l10n.notifyCommentsDesc,
+                          content: Checkbox(
+                            value:
+                                notifyComment.value ??
+                                auth.user.settings.notifyComment,
+                            onChanged: (bool? value) {
+                              notifyComment.value = value;
+                            },
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
-                const SizedBox(height: 25),
-                // ALGORITHM
-                Card(
-                  child: Column(
-                    children: <Widget>[
-                      const SizedBox(height: 20),
-                      Text(context.l10n.algorithm).headlineSmall(context),
-                      const SizedBox(height: 5),
-                      Tile(
-                        title: Text(context.l10n.algoLikeWeight).title(context),
-                        tooltip: context.l10n.algoLikeWeightDesc,
-                        content: Row(
-                          children: <Widget>[
-                            Text(
-                              (algoLikeWeight.value ??
-                                      auth.user.settings.algoLikeWeight)
-                                  .toStringAsFixed(2),
-                            ),
-                            Expanded(
-                              child: Slider(
-                                divisions: 20,
-                                value:
-                                    algoLikeWeight.value ??
-                                    auth.user.settings.algoLikeWeight,
-                                onChanged: (double value) {
-                                  algoLikeWeight.value = value;
-                                },
+                  const SizedBox(height: 25),
+                  // ALGORITHM
+                  Card(
+                    child: Column(
+                      children: <Widget>[
+                        const SizedBox(height: 20),
+                        Text(context.l10n.algorithm).headlineSmall(context),
+                        const SizedBox(height: 5),
+                        Tile(
+                          title: Text(
+                            context.l10n.algoLikeWeight,
+                          ).title(context),
+                          tooltip: context.l10n.algoLikeWeightDesc,
+                          content: Row(
+                            children: <Widget>[
+                              Text(
+                                (algoLikeWeight.value ??
+                                        auth.user.settings.algoLikeWeight)
+                                    .toStringAsFixed(2),
                               ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 5),
-                      Tile(
-                        title: Text(
-                          context.l10n.algoDislikeWeight,
-                        ).title(context),
-                        tooltip: context.l10n.algoDislikeWeightDesc,
-                        content: Row(
-                          children: <Widget>[
-                            Text(
-                              (algoDislikeWeight.value ??
-                                      auth.user.settings.algoDislikeWeight)
-                                  .toStringAsFixed(2),
-                            ),
-                            Expanded(
-                              child: Slider(
-                                divisions: 20,
-                                value:
-                                    algoDislikeWeight.value ??
-                                    auth.user.settings.algoDislikeWeight,
-                                onChanged: (double value) {
-                                  algoDislikeWeight.value = value;
-                                },
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 5),
-                      Tile(
-                        title: Text(
-                          context.l10n.algoCommentWeight,
-                        ).title(context),
-                        tooltip: context.l10n.algoCommentWeightDesc,
-                        content: Row(
-                          children: <Widget>[
-                            Text(
-                              (algoCommentWeight.value ??
-                                      auth.user.settings.algoCommentWeight)
-                                  .toStringAsFixed(2),
-                            ),
-                            Expanded(
-                              child: Slider(
-                                divisions: 20,
-                                value:
-                                    algoCommentWeight.value ??
-                                    auth.user.settings.algoCommentWeight,
-                                onChanged: (double value) {
-                                  algoCommentWeight.value = value;
-                                },
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 5),
-                      Tile(
-                        title: Text(context.l10n.algoTimeDecay).title(context),
-                        tooltip: context.l10n.algoTimeDecayDesc,
-                        content: Row(
-                          children: <Widget>[
-                            Text(
-                              (algoTimeDecay.value ??
-                                      auth.user.settings.algoTimeDecay)
-                                  .toStringAsFixed(2),
-                            ),
-                            Expanded(
-                              child: Slider(
-                                divisions: 20,
-                                value:
-                                    algoTimeDecay.value ??
-                                    auth.user.settings.algoTimeDecay,
-                                onChanged: (double value) {
-                                  algoTimeDecay.value = value;
-                                },
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 5),
-                      FilledButton.icon(
-                        onPressed: () async {
-                          await showDialog<void>(
-                            context: context,
-                            builder: (BuildContext context) =>
-                                _buildResetAlgoDialog(
-                                  context,
-                                  ref,
-                                  auth,
-                                  resetAlgoTags,
+                              Expanded(
+                                child: Slider(
+                                  divisions: 20,
+                                  value:
+                                      algoLikeWeight.value ??
+                                      auth.user.settings.algoLikeWeight,
+                                  onChanged: (double value) {
+                                    algoLikeWeight.value = value;
+                                  },
                                 ),
-                          );
-                        },
-                        label: Text(context.l10n.resetAlgo),
-                        icon: const Icon(Icons.restart_alt),
-                      ),
-                      const SizedBox(height: 25),
-                    ],
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 5),
+                        Tile(
+                          title: Text(
+                            context.l10n.algoDislikeWeight,
+                          ).title(context),
+                          tooltip: context.l10n.algoDislikeWeightDesc,
+                          content: Row(
+                            children: <Widget>[
+                              Text(
+                                (algoDislikeWeight.value ??
+                                        auth.user.settings.algoDislikeWeight)
+                                    .toStringAsFixed(2),
+                              ),
+                              Expanded(
+                                child: Slider(
+                                  divisions: 20,
+                                  value:
+                                      algoDislikeWeight.value ??
+                                      auth.user.settings.algoDislikeWeight,
+                                  onChanged: (double value) {
+                                    algoDislikeWeight.value = value;
+                                  },
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 5),
+                        Tile(
+                          title: Text(
+                            context.l10n.algoCommentWeight,
+                          ).title(context),
+                          tooltip: context.l10n.algoCommentWeightDesc,
+                          content: Row(
+                            children: <Widget>[
+                              Text(
+                                (algoCommentWeight.value ??
+                                        auth.user.settings.algoCommentWeight)
+                                    .toStringAsFixed(2),
+                              ),
+                              Expanded(
+                                child: Slider(
+                                  divisions: 20,
+                                  value:
+                                      algoCommentWeight.value ??
+                                      auth.user.settings.algoCommentWeight,
+                                  onChanged: (double value) {
+                                    algoCommentWeight.value = value;
+                                  },
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 5),
+                        Tile(
+                          title: Text(
+                            context.l10n.algoTimeDecay,
+                          ).title(context),
+                          tooltip: context.l10n.algoTimeDecayDesc,
+                          content: Row(
+                            children: <Widget>[
+                              Text(
+                                (algoTimeDecay.value ??
+                                        auth.user.settings.algoTimeDecay)
+                                    .toStringAsFixed(2),
+                              ),
+                              Expanded(
+                                child: Slider(
+                                  divisions: 20,
+                                  value:
+                                      algoTimeDecay.value ??
+                                      auth.user.settings.algoTimeDecay,
+                                  onChanged: (double value) {
+                                    algoTimeDecay.value = value;
+                                  },
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 5),
+                        FilledButton.icon(
+                          onPressed: () async {
+                            await showDialog<void>(
+                              context: context,
+                              builder: (BuildContext context) =>
+                                  _buildResetAlgoDialog(
+                                    context,
+                                    ref,
+                                    auth,
+                                    resetAlgoTags,
+                                  ),
+                            );
+                          },
+                          label: Text(context.l10n.resetAlgo),
+                          icon: const Icon(Icons.restart_alt),
+                        ),
+                        const SizedBox(height: 25),
+                      ],
+                    ),
                   ),
-                ),
-                const SizedBox(height: 25),
-              ],
+                ],
+              ),
             ),
           ),
         );
@@ -365,43 +336,49 @@ Dialog _buildResetAlgoDialog(
   AuthService auth,
   ValueNotifier<Set<String>> resetAlgoTags,
 ) => Dialog(
-  child: SizedBox(
-    width: 450,
-    height: 200,
-    child: Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: <Widget>[
-        Text(context.l10n.tagsDesc).titleLarge(context),
-        const SizedBox(height: 15),
-        TagList(
-          onChanged: (Set<String> tags) {
-            resetAlgoTags.value = tags;
-          },
-        ),
-        const SizedBox(height: 7.5),
-        if (resetAlgoTags.value.isEmpty)
+  child: ConstrainedBox(
+    constraints: const BoxConstraints(minWidth: 280, maxWidth: 500),
+    child: SingleChildScrollView(
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
           Text(
-            context.l10n.noTagsSpecified,
+            context.l10n.tagsDesc,
             textAlign: TextAlign.center,
-          ).title(context).error(context),
-        const SizedBox(height: 25),
-        FilledButton(
-          onPressed: () async {
-            if (resetAlgoTags.value.isNotEmpty) {
-              await showDialog<void>(
-                context: context,
-                builder: (BuildContext context) => _buildConfirmResetAlgoDialog(
-                  context,
-                  ref,
-                  auth,
-                  resetAlgoTags,
-                ),
-              );
-            }
-          },
-          child: Text(context.l10n.resetAlgo),
-        ),
-      ],
+          ).titleLarge(context),
+          const SizedBox(height: 12),
+          TagList(
+            onChanged: (Set<String> tags) {
+              resetAlgoTags.value = Set<String>.from(tags);
+            },
+          ),
+          const SizedBox(height: 8),
+          if (resetAlgoTags.value.isEmpty)
+            Text(
+              context.l10n.noTagsSpecified,
+              textAlign: TextAlign.center,
+            ).title(context).error(context),
+          const SizedBox(height: 16),
+          FilledButton(
+            onPressed: () async {
+              if (resetAlgoTags.value.isNotEmpty) {
+                await showDialog<void>(
+                  context: context,
+                  builder: (BuildContext context) =>
+                      _buildConfirmResetAlgoDialog(
+                        context,
+                        ref,
+                        auth,
+                        resetAlgoTags,
+                      ),
+                );
+              }
+            },
+            child: Text(context.l10n.resetAlgo),
+          ),
+        ],
+      ),
     ),
   ),
 );
@@ -458,3 +435,74 @@ AlertDialog _buildConfirmResetAlgoDialog(
     ),
   ],
 );
+
+Future<void> _saveSettings(
+  BuildContext context,
+  WidgetRef ref, {
+  required bool? darkMode,
+  required bool? animations,
+  required bool? allowInvites,
+  required double? algoLikeWeight,
+  required double? algoDislikeWeight,
+  required double? algoCommentWeight,
+  required double? algoTimeDecay,
+  required bool? notifyInvite,
+  required bool? notifyMessage,
+  required bool? notifyComment,
+}) async {
+  final AuraClient client = await ref.read(auraClientProvider.future);
+  final AuthService auth = await ref.read(authProvider.future);
+  final StorageNotifier storage = await ref.read(storageProvider.notifier);
+  final Storage storageProv = await ref.read(storageProvider.future);
+
+  if (storageProv.settings.isDirty(
+    darkMode: darkMode,
+    animations: animations,
+  )) {
+    logger.i('Updating local settings...');
+    await storage.updateSettings((Settings settings) {
+      settings
+        ..darkMode = darkMode ?? settings.darkMode
+        ..animations = animations ?? settings.animations;
+    });
+  }
+
+  if (auth.user.settings.isDirty(
+    allowInvites: allowInvites,
+    algoLikeWeight: algoLikeWeight,
+    algoDislikeWeight: algoDislikeWeight,
+    algoCommentWeight: algoCommentWeight,
+    algoTimeDecay: algoTimeDecay,
+    notifyInvite: notifyInvite,
+    notifyMessage: notifyMessage,
+    notifyComment: notifyComment,
+  )) {
+    final UserSettings userSettings = auth.user.settings.deepCopy();
+
+    logger.i('Updating user settings...');
+    final UpdateResponse resp = await client.userService.update(
+      UpdateRequest(
+        settings: userSettings.update(
+          allowInvites: allowInvites,
+          algoLikeWeight: algoLikeWeight,
+          algoDislikeWeight: algoDislikeWeight,
+          algoCommentWeight: algoCommentWeight,
+          algoTimeDecay: algoTimeDecay,
+          notifyInvite: notifyInvite,
+          notifyMessage: notifyMessage,
+          notifyComment: notifyComment,
+        ),
+      ),
+      options: auth.buildOptions(),
+    );
+
+    if (resp.hasError() && context.mounted) {
+      await ErrorDialog(
+        ServiceException(resp.error),
+        Map<ServiceErrorType, String>.identity(),
+      ).show(context);
+    }
+
+    await auth.refresh();
+  }
+}

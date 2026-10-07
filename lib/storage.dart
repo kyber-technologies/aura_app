@@ -179,4 +179,8 @@ class Settings {
     'darkMode': darkMode.toString(),
     'animations': animations.toString(),
   });
+
+  bool isDirty({bool? darkMode, bool? animations}) =>
+      this.darkMode != (darkMode ?? this.darkMode) ||
+      this.animations != (animations ?? this.animations);
 }

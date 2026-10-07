@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 
 class Tile extends StatelessWidget {
   final String? tooltip;
@@ -21,18 +22,20 @@ class Tile extends StatelessWidget {
         : title;
 
     return Padding(
-      padding: const EdgeInsets.only(left: 15),
+      padding: const EdgeInsets.only(left: 10),
       child: ConstrainedBox(
-        constraints: const BoxConstraints.expand(width: 750, height: 50),
+        constraints: BoxConstraints(
+          minWidth: 100.w,
+          maxWidth: 600.w,
+          minHeight: 36.h,
+        ),
         child: Row(
           children: <Widget>[
             Expanded(
               flex: 2,
               child: Align(alignment: Alignment.centerLeft, child: titleWidget),
             ),
-
-            SizedBox(width: spacing),
-
+            if (spacing != null) SizedBox(width: spacing),
             Expanded(
               flex: 3,
               child: Align(alignment: Alignment.centerRight, child: content),

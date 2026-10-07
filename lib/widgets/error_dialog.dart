@@ -1,4 +1,5 @@
-import 'package:aura_app/ext.dart';
+import 'package:aura_app/ext/common.dart';
+import 'package:aura_app/ext/text.dart';
 import 'package:aura_app/grpc/exception.dart';
 import 'package:aura_app/logger.dart';
 import 'package:flutter/material.dart';
