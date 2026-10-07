@@ -37,7 +37,13 @@ class ErrorDialog extends HookConsumerWidget {
     });
 
     return Dialog(
-      child: Expanded(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(
+          minWidth: 300,
+          maxWidth: 600,
+          minHeight: 50,
+          maxHeight: 300
+        ),
         child: Padding(
           padding: const EdgeInsets.all(10),
           child: Column(
