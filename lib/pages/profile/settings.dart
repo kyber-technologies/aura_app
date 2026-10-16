@@ -811,7 +811,6 @@ Future<void> _saveSettings(
       await ErrorDialog(
         ServiceException(resp.error),
         <ServiceErrorType, String>{
-          // TODO: Better message
           ServiceErrorType.unauthorized: context.l10n.emailTokenInvalid,
         },
       ).show(context);
