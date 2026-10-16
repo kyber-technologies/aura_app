@@ -48,10 +48,7 @@ class ProfilePage extends HookConsumerWidget {
                             : auth.user.about,
                       )
                       .title(context)
-                      .copyWithStyle(
-                        color: Theme.of(context).colorScheme.tertiary,
-                        fontWeight: FontWeight.w300,
-                      )
+                      .copyWithStyle(fontWeight: FontWeight.w300)
                       .contentBox(context)
                       .selectable(),
                   const SizedBox(height: 15),
