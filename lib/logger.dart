@@ -1,8 +1,8 @@
 import 'dart:io';
 
-import 'package:aura_app/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:logger/logger.dart';
+import 'package:path/path.dart' as paths;
 import 'package:path_provider/path_provider.dart';
 
 late final Logger logger;
@@ -14,9 +14,10 @@ Future<void> initLogger() async {
   );
 
   // TODO: Rework this.
-  final String logDir = joinPaths(
+  final String logDir = paths.join(
     (await getApplicationDocumentsDirectory()).path,
-    <String>['aura', 'logs'],
+    'aura',
+    'logs',
   );
   await Directory(logDir).create(recursive: true);
 

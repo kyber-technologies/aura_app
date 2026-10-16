@@ -43,6 +43,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get emailInvalid => 'Please enter a valid email address';
 
   @override
+  String get noEmailTokenInvalid => 'Please enter your email token';
+
+  @override
+  String get emailTokenInvalid => 'Invalid email token. Please try again.';
+
+  @override
   String get password => 'password';
 
   @override
@@ -113,13 +119,58 @@ class AppLocalizationsEn extends AppLocalizations {
   String get submit => 'Submit';
 
   @override
+  String get upload => 'Upload';
+
+  @override
+  String get cancel => 'Cancel';
+
+  @override
+  String get noAbout => 'Nothing about you... yet?';
+
+  @override
+  String get profile => 'Profile';
+
+  @override
+  String get profileUsername => 'Your Username';
+
+  @override
+  String get newProfileUsername => 'Your new Username';
+
+  @override
+  String get profileUsernameDesc => 'Edit your Username.';
+
+  @override
+  String get profileAbout => 'About You';
+
+  @override
+  String get newProfileAbout => 'Your new About You';
+
+  @override
+  String get profileAboutDesc => 'Edit your About You.';
+
+  @override
+  String get profileEmail => 'Your Email';
+
+  @override
+  String get newProfileEmail => 'Your new Email';
+
+  @override
+  String get profileEmailDesc => 'Edit your Email.';
+
+  @override
+  String get profileIcon => 'Your Profile Icon';
+
+  @override
+  String get profileIconDesc => 'Edit your Profile Icon.';
+
+  @override
   String get general => 'General';
 
   @override
   String get allowInvites => 'Allow Invites';
 
   @override
-  String get allowInvitesDesc => 'Allow invites and DMs from other users.';
+  String get allowInvitesDesc => 'Allow invites and DMs from other Users.';
 
   @override
   String get appearance => 'Appearance';
@@ -128,7 +179,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get darkMode => 'Dark Mode';
 
   @override
-  String get darkModeDesc => 'Toggle dark mode theme.';
+  String get darkModeDesc => 'Toggle Dark Mode Theme.';
 
   @override
   String get animations => 'Animations';
@@ -143,20 +194,20 @@ class AppLocalizationsEn extends AppLocalizations {
   String get notifyInvites => 'Notify for Invites';
 
   @override
-  String get notifyInvitesDesc => 'Enable notifications for invites.';
+  String get notifyInvitesDesc => 'Enable Notifications for invites.';
 
   @override
   String get notifyMessages => 'Notify for Messages';
 
   @override
-  String get notifyMessagesDesc => 'Enable notifications for direct messages.';
+  String get notifyMessagesDesc => 'Enable Notifications for direct messages.';
 
   @override
   String get notifyComments => 'Notify for Comments';
 
   @override
   String get notifyCommentsDesc =>
-      'Enable notifications for comments on your posts.';
+      'Enable Notifications for Comments on your Posts.';
 
   @override
   String get algorithm => 'Algorithm';
@@ -166,28 +217,28 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get algoLikeWeightDesc =>
-      'Weight of likes in the algorithm. Higher values can get you into filter bubbles.';
+      'Weight of Likes in the Algorithm. Higher values can get you into filter bubbles.';
 
   @override
   String get algoDislikeWeight => 'Algorithm Dislike Weight.';
 
   @override
   String get algoDislikeWeightDesc =>
-      'Weight of dislikes in the algorithm. Lower values can get you into filter bubbles.';
+      'Weight of Dislikes in the Algorithm. Lower values can get you into filter bubbles.';
 
   @override
   String get algoCommentWeight => 'Algorithm Comment Weight';
 
   @override
   String get algoCommentWeightDesc =>
-      'Weight of comments in the algorithm. Higher values can recommend you rage-bait posts.';
+      'Weight of Comments in the Algorithm. Higher values can recommend you rage-bait Posts.';
 
   @override
   String get algoTimeDecay => 'Algorithm Time Decay';
 
   @override
   String get algoTimeDecayDesc =>
-      'Time weight decay of posts. Higher values will give you more recent posts.';
+      'Time weight decay of Posts. Higher values will give you more recent Posts.';
 
   @override
   String get resetAlgo => 'Reset Algorithm';
@@ -197,5 +248,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get resetAlgoConfirmBody =>
-      'Are you sure you want to reset your algorithm? This action cannot be undone.';
+      'Are you sure you want to reset your Algorithm? This action cannot be undone.';
+
+  @override
+  String invalidUploadFormat(Object format) {
+    return 'Invalid upload format: $format';
+  }
 }

@@ -6,10 +6,8 @@ class FeedPage extends HookConsumerWidget {
   const FeedPage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return Scaffold(
+  Widget build(BuildContext context, WidgetRef ref) => const Scaffold(
       bottomNavigationBar: Navbar(),
-      body: const Center(child: Text('Feed')),
+      body: Center(child: Text('Feed')),
     );
-  }
 }

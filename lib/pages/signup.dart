@@ -7,7 +7,7 @@ import 'package:aura_app/logger.dart';
 import 'package:aura_app/router.dart';
 import 'package:aura_app/storage.dart';
 import 'package:aura_app/utils.dart';
-import 'package:aura_app/widgets/error_dialog.dart';
+import 'package:aura_app/widgets/dialogs.dart';
 import 'package:aura_app/widgets/loader.dart';
 import 'package:aura_app/widgets/navbar.dart';
 import 'package:aura_app/widgets/tag_list.dart';

@@ -4,7 +4,7 @@ import 'package:aura_app/grpc/auth.dart';
 import 'package:aura_app/grpc/exception.dart';
 import 'package:aura_app/logger.dart';
 import 'package:aura_app/router.dart';
-import 'package:aura_app/widgets/error_dialog.dart';
+import 'package:aura_app/widgets/dialogs.dart';
 import 'package:aura_app/widgets/loader.dart';
 import 'package:aura_app/widgets/navbar.dart';
 import 'package:flutter/material.dart';

@@ -1,20 +1,28 @@
 import 'package:aura_app/ext/common.dart';
 import 'package:aura_app/ext/grpc.dart';
 import 'package:aura_app/ext/widgets.dart';
+import 'package:aura_app/files.dart';
 import 'package:aura_app/grpc/auth.dart';
 import 'package:aura_app/grpc/client.dart';
 import 'package:aura_app/grpc/exception.dart';
+import 'package:aura_app/grpc/resources.dart';
 import 'package:aura_app/logger.dart';
 import 'package:aura_app/storage.dart';
-import 'package:aura_app/widgets/error_dialog.dart';
+import 'package:aura_app/utils.dart';
+import 'package:aura_app/widgets/avatar.dart';
+import 'package:aura_app/widgets/dialogs.dart';
 import 'package:aura_app/widgets/loader.dart';
 import 'package:aura_app/widgets/navbar.dart';
+import 'package:aura_app/widgets/overlay.dart';
 import 'package:aura_app/widgets/tag_list.dart';
 import 'package:aura_app/widgets/tile.dart';
+import 'package:aura_dart/resource.dart';
 import 'package:aura_dart/user.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:protobuf/well_known_types/google/protobuf/empty.pb.dart';
 
 class SettingsPage extends HookConsumerWidget {
   const SettingsPage({super.key});
@@ -25,6 +33,12 @@ class SettingsPage extends HookConsumerWidget {
       storageProvider.selectAsync((Storage storage) => storage.settings),
     );
     final Future<AuthService> authFut = ref.watch(authProvider.future);
+
+    final ValueNotifier<String?> newProfileUsername = useState(null);
+    final ValueNotifier<String?> newProfileAbout = useState(null);
+    final ValueNotifier<String?> newProfileEmail = useState(null);
+    final ValueNotifier<String?> newProfileEmailToken = useState(null);
+    final ValueNotifier<Image?> newProfileAvatar = useState(null);
 
     final ValueNotifier<bool?> allowInvites = useState<bool?>(null);
 
@@ -47,6 +61,10 @@ class SettingsPage extends HookConsumerWidget {
         onPressed: () async => _saveSettings(
           context,
           ref,
+          username: newProfileUsername.value,
+          about: newProfileAbout.value,
+          email: newProfileEmail.value,
+          token: newProfileEmailToken.value,
           darkMode: darkMode.value,
           animations: animations.value,
           allowInvites: allowInvites.value,
@@ -76,14 +94,15 @@ class SettingsPage extends HookConsumerWidget {
               padding: const EdgeInsets.all(15),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
+                spacing: 10,
                 children: <Widget>[
-                  // GENERAL
+                  // PROFILE
                   Card(
                     child: Column(
                       children: <Widget>[
                         const SizedBox(height: 20),
-                        Text(context.l10n.general).headlineSmall(context),
-                        const SizedBox(height: 5),
+                        Text(context.l10n.profile).headlineSmall(context),
+                        const SizedBox(height: 10),
                         Tile(
                           title: Text(context.l10n.allowInvites).title(context),
                           tooltip: context.l10n.allowInvitesDesc,
@@ -97,17 +116,166 @@ class SettingsPage extends HookConsumerWidget {
                           ),
                         ),
                         const SizedBox(height: 5),
+                        Tile(
+                          spacing: 10,
+                          title: Text(
+                            context.l10n.profileUsername,
+                          ).title(context),
+                          tooltip: context.l10n.profileUsernameDesc,
+                          content: OverlayButton(
+                            onTap: () async {
+                              await EditDialog(
+                                label: context.l10n.newProfileUsername,
+                                validator: (String? text) =>
+                                    (text?.isEmpty ?? true)
+                                    ? context.l10n.usernameInvalid
+                                    : null,
+                                onSubmit: (String changed) {
+                                  newProfileUsername.value = changed;
+                                },
+                              ).show(context);
+                            },
+                            overlayChild: const Icon(Icons.edit),
+                            child: Text(
+                              newProfileUsername.value ?? auth.user.username,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 5),
+                        Tile(
+                          spacing: 10,
+                          title: Text(context.l10n.profileAbout).title(context),
+                          tooltip: context.l10n.profileAboutDesc,
+                          content: OverlayButton(
+                            onTap: () async {
+                              await EditDialog(
+                                label: context.l10n.newProfileAbout,
+                                onSubmit: (String changed) {
+                                  newProfileAbout.value = changed;
+                                },
+                                multiline: true,
+                              ).show(context);
+                            },
+                            overlayChild: const Icon(Icons.edit),
+                            child: Text(
+                              (newProfileAbout.value ?? auth.user.about).isEmpty
+                                  ? context.l10n.noAbout
+                                  : newProfileAbout.value ?? auth.user.about,
+                            ).contentBox(context),
+                          ),
+                        ),
+                        const SizedBox(height: 5),
+                        Tile(
+                          spacing: 10,
+                          title: Text(context.l10n.profileEmail).title(context),
+                          tooltip: context.l10n.profileEmailDesc,
+                          content: OverlayButton(
+                            onTap: () async {
+                              await EditDialog(
+                                barrierDismissable: false,
+                                label: context.l10n.newProfileEmail,
+                                validator: (String? text) =>
+                                    ((text?.isNotEmpty ?? true) &&
+                                        isValidEmail(text ?? ''))
+                                    ? null
+                                    : context.l10n.emailInvalid,
+                                onSubmit: (String changed) {
+                                  newProfileEmail.value = changed;
+                                },
+                              ).show(context);
+
+                              if (newProfileEmail.value != null) {
+                                final AuraClient client = await ref.read(
+                                  auraClientProvider.future,
+                                );
+
+                                logger.i(
+                                  'Sending email verification request...',
+                                );
+                                final VerifyEmailResponse verifyResp =
+                                    await client.userService.verifyEmail(
+                                      VerifyEmailRequest(
+                                        email: newProfileEmail.value,
+                                      ),
+                                    );
+
+                                if (verifyResp.hasError() && context.mounted) {
+                                  await ErrorDialog(
+                                    ServiceException(verifyResp.error),
+                                    const <ServiceErrorType, String>{},
+                                  ).show(context);
+                                }
+
+                                if (context.mounted) {
+                                  await EditDialog(
+                                    barrierDismissable: false,
+                                    label: context.l10n.verifyEmailBody(
+                                      newProfileEmail.value ?? '',
+                                    ),
+                                    onSubmit: (String text) {
+                                      newProfileEmailToken.value = text;
+                                    },
+                                    validator: (String? text) =>
+                                        (text ?? '').isEmpty
+                                        ? context.l10n.noEmailTokenInvalid
+                                        : null,
+                                    onCancel: () {
+                                      newProfileEmail.value = null;
+                                      newProfileEmailToken.value = null;
+                                    },
+                                  ).show(context);
+                                }
+                              } else {
+                                newProfileEmail.value = null;
+                                newProfileEmailToken.value = null;
+                              }
+                            },
+                            overlayChild: const Icon(Icons.edit),
+                            child: Text(
+                              newProfileEmail.value ?? auth.user.email,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 5),
+                        Tile(
+                          spacing: 10,
+                          title: Text(context.l10n.profileIcon).title(context),
+                          tooltip: context.l10n.profileIconDesc,
+                          content: OverlayButton(
+                            overlayChild: const Icon(Icons.edit),
+                            borderRadius: 25,
+                            onTap: () async {
+                              await _buildUploadAvatarDialog(
+                                context,
+                                ref,
+                                auth,
+                                newProfileAvatar,
+                              ).show<void>(context);
+                            },
+                            child: newProfileAvatar.value == null
+                                ? Avatar(
+                                    auth.user.userId,
+                                    width: 25.sp,
+                                    height: 25.sp,
+                                  )
+                                : Avatar.image(
+                                    newProfileAvatar.value,
+                                    width: 25.sp,
+                                    height: 25.sp,
+                                  ),
+                          ),
+                        ),
+                        const SizedBox(height: 5),
                       ],
                     ),
                   ),
-                  const SizedBox(height: 25),
                   // APPEARANCE
                   Card(
                     child: Column(
                       children: <Widget>[
                         const SizedBox(height: 20),
                         Text(context.l10n.appearance).headlineSmall(context),
-                        const SizedBox(height: 5),
+                        const SizedBox(height: 10),
                         Tile(
                           title: Text(context.l10n.darkMode).title(context),
                           tooltip: context.l10n.darkModeDesc,
@@ -131,14 +299,13 @@ class SettingsPage extends HookConsumerWidget {
                       ],
                     ),
                   ),
-                  const SizedBox(height: 25),
                   // NOTIFICATIONS
                   Card(
                     child: Column(
                       children: <Widget>[
                         const SizedBox(height: 20),
                         Text(context.l10n.notifications).headlineSmall(context),
-                        const SizedBox(height: 5),
+                        const SizedBox(height: 10),
                         Tile(
                           title: Text(
                             context.l10n.notifyInvites,
@@ -184,14 +351,13 @@ class SettingsPage extends HookConsumerWidget {
                       ],
                     ),
                   ),
-                  const SizedBox(height: 25),
                   // ALGORITHM
                   Card(
                     child: Column(
                       children: <Widget>[
                         const SizedBox(height: 20),
                         Text(context.l10n.algorithm).headlineSmall(context),
-                        const SizedBox(height: 5),
+                        const SizedBox(height: 10),
                         Tile(
                           title: Text(
                             context.l10n.algoLikeWeight,
@@ -218,7 +384,6 @@ class SettingsPage extends HookConsumerWidget {
                             ],
                           ),
                         ),
-                        const SizedBox(height: 5),
                         Tile(
                           title: Text(
                             context.l10n.algoDislikeWeight,
@@ -245,7 +410,6 @@ class SettingsPage extends HookConsumerWidget {
                             ],
                           ),
                         ),
-                        const SizedBox(height: 5),
                         Tile(
                           title: Text(
                             context.l10n.algoCommentWeight,
@@ -272,7 +436,6 @@ class SettingsPage extends HookConsumerWidget {
                             ],
                           ),
                         ),
-                        const SizedBox(height: 5),
                         Tile(
                           title: Text(
                             context.l10n.algoTimeDecay,
@@ -299,19 +462,15 @@ class SettingsPage extends HookConsumerWidget {
                             ],
                           ),
                         ),
-                        const SizedBox(height: 5),
+                        const SizedBox(height: 10),
                         FilledButton.icon(
                           onPressed: () async {
-                            await showDialog<void>(
-                              context: context,
-                              builder: (BuildContext context) =>
-                                  _buildResetAlgoDialog(
-                                    context,
-                                    ref,
-                                    auth,
-                                    resetAlgoTags,
-                                  ),
-                            );
+                            await _buildResetAlgoDialog(
+                              context,
+                              ref,
+                              auth,
+                              resetAlgoTags,
+                            ).show<void>(context);
                           },
                           label: Text(context.l10n.resetAlgo),
                           icon: const Icon(Icons.restart_alt),
@@ -363,16 +522,12 @@ Dialog _buildResetAlgoDialog(
           FilledButton(
             onPressed: () async {
               if (resetAlgoTags.value.isNotEmpty) {
-                await showDialog<void>(
-                  context: context,
-                  builder: (BuildContext context) =>
-                      _buildConfirmResetAlgoDialog(
-                        context,
-                        ref,
-                        auth,
-                        resetAlgoTags,
-                      ),
-                );
+                await _buildConfirmResetAlgoDialog(
+                  context,
+                  ref,
+                  auth,
+                  resetAlgoTags,
+                ).show<void>(context);
               }
             },
             child: Text(context.l10n.resetAlgo),
@@ -382,6 +537,151 @@ Dialog _buildResetAlgoDialog(
     ),
   ),
 );
+
+Dialog _buildUploadAvatarDialog(
+  BuildContext context,
+  WidgetRef ref,
+  AuthService auth,
+  ValueNotifier<Image?> newProfileAvatar,
+) {
+  final ValueNotifier<double?> uploadProgress = ValueNotifier<double?>(null);
+
+  return Dialog(
+    child: ConstrainedBox(
+      constraints: const BoxConstraints(minWidth: 300, maxWidth: 450),
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          spacing: 20,
+          children: <Widget>[
+            Text(context.l10n.profileIcon).titleLarge(context),
+
+            if (newProfileAvatar.value == null)
+              Avatar(auth.user.userId, width: 30.sp, height: 30.sp)
+            else
+              Avatar.image(
+                newProfileAvatar.value!,
+                width: 30.sp,
+                height: 30.sp,
+              ),
+
+            Text(
+              context.l10n.profileIconDesc,
+              textAlign: TextAlign.center,
+            ).body(context),
+
+            ValueListenableBuilder<double?>(
+              valueListenable: uploadProgress,
+              builder: (BuildContext context, double? progress, Widget? child) {
+                if (progress == null) {
+                  return const SizedBox.shrink();
+                }
+                return Column(
+                  children: <Widget>[
+                    LinearProgressIndicator(value: progress),
+                    const SizedBox(height: 8),
+                    Text(
+                      '${(progress * 100).toStringAsFixed(0)}%',
+                    ).body(context),
+                  ],
+                );
+              },
+            ),
+
+            Builder(
+              builder: (BuildContext dialogContext) => Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                spacing: 15,
+                children: <Widget>[
+                  FilledButton.icon(
+                    onPressed: uploadProgress.value != null
+                        ? null
+                        : () async {
+                            logger.i('Selecting new avatar file...');
+
+                            final AuraClient client = await ref.read(
+                              auraClientProvider.future,
+                            );
+
+                            final FileData? image = await requestImage();
+
+                            if (image != null) {
+                              if (context.mounted) {
+                                await image.validateFormat(
+                                  client.config.supportedResourceFormats,
+                                  context,
+                                );
+                              }
+
+                              uploadProgress.value = 0.0;
+
+                              final UploadResponse resp = await client
+                                  .resourceService
+                                  .upload(
+                                    image.createUploadStream(
+                                      namespace: ResourceNamespace(
+                                        userIcon: Empty(),
+                                      ),
+                                      chunkSize:
+                                          client.config.resourceChunkSize,
+                                      name: auth.user.userId,
+                                      onProgress: (int sent, int total) {
+                                        uploadProgress.value = sent / total;
+                                      },
+                                    ),
+                                    options: auth.buildOptions(),
+                                  );
+
+                              if (resp.hasError() && context.mounted) {
+                                uploadProgress.value = null;
+                                await ErrorDialog(
+                                  ServiceException(resp.error),
+                                  const <ServiceErrorType, String>{},
+                                ).show(context);
+                                return;
+                              }
+
+                              final ResourceManager resourceManager = await ref
+                                  .read(resourceProvider.future);
+
+                              await resourceManager.delete(
+                                ResourceId(
+                                  namespace: ResourceNamespace(
+                                    userIcon: Empty(),
+                                  ),
+                                  key: auth.user.userId,
+                                ),
+                              );
+
+                              newProfileAvatar.value = Image.memory(image.data);
+
+                              if (dialogContext.mounted) {
+                                Navigator.of(dialogContext).pop();
+                              }
+                            }
+                          },
+                    label: Text(context.l10n.upload),
+                    icon: const Icon(Icons.upload),
+                  ),
+                  TextButton(
+                    onPressed: uploadProgress.value != null
+                        ? null
+                        : () => Navigator.of(dialogContext).pop(),
+                    child: Text(
+                      context.l10n.cancel,
+                    ).title(context).error(context),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
+}
 
 AlertDialog _buildConfirmResetAlgoDialog(
   BuildContext context,
@@ -415,7 +715,7 @@ AlertDialog _buildConfirmResetAlgoDialog(
           logger.e('Failed to reset user algo: ${resp.error}');
           await ErrorDialog(
             ServiceException(resp.error),
-            Map<ServiceErrorType, String>.identity(),
+            const <ServiceErrorType, String>{},
           ).show(context);
         }
 
@@ -439,6 +739,10 @@ AlertDialog _buildConfirmResetAlgoDialog(
 Future<void> _saveSettings(
   BuildContext context,
   WidgetRef ref, {
+  required String? username,
+  required String? about,
+  required String? email,
+  required String? token,
   required bool? darkMode,
   required bool? animations,
   required bool? allowInvites,
@@ -468,20 +772,27 @@ Future<void> _saveSettings(
   }
 
   if (auth.user.settings.isDirty(
-    allowInvites: allowInvites,
-    algoLikeWeight: algoLikeWeight,
-    algoDislikeWeight: algoDislikeWeight,
-    algoCommentWeight: algoCommentWeight,
-    algoTimeDecay: algoTimeDecay,
-    notifyInvite: notifyInvite,
-    notifyMessage: notifyMessage,
-    notifyComment: notifyComment,
-  )) {
+        allowInvites: allowInvites,
+        algoLikeWeight: algoLikeWeight,
+        algoDislikeWeight: algoDislikeWeight,
+        algoCommentWeight: algoCommentWeight,
+        algoTimeDecay: algoTimeDecay,
+        notifyInvite: notifyInvite,
+        notifyMessage: notifyMessage,
+        notifyComment: notifyComment,
+      ) ||
+      auth.user.username != username ||
+      auth.user.about != about ||
+      auth.user.email != email) {
     final UserSettings userSettings = auth.user.settings.deepCopy();
 
     logger.i('Updating user settings...');
     final UpdateResponse resp = await client.userService.update(
       UpdateRequest(
+        username: username,
+        about: about,
+        email: email,
+        token: token,
         settings: userSettings.update(
           allowInvites: allowInvites,
           algoLikeWeight: algoLikeWeight,
@@ -499,7 +810,10 @@ Future<void> _saveSettings(
     if (resp.hasError() && context.mounted) {
       await ErrorDialog(
         ServiceException(resp.error),
-        Map<ServiceErrorType, String>.identity(),
+        <ServiceErrorType, String>{
+          // TODO: Better message
+          ServiceErrorType.unauthorized: context.l10n.emailTokenInvalid,
+        },
       ).show(context);
     }
 

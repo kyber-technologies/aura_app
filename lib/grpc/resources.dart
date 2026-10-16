@@ -1,10 +1,13 @@
 import 'dart:convert';
+import 'dart:typed_data';
 
+import 'package:aura_app/ext/common.dart';
 import 'package:aura_app/grpc/auth.dart';
 import 'package:aura_app/grpc/client.dart';
+import 'package:aura_app/grpc/exception.dart';
+import 'package:aura_app/logger.dart';
 import 'package:aura_app/storage.dart';
 import 'package:aura_dart/resource.dart';
-import 'package:flutter/foundation.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:protobuf/well_known_types/google/protobuf/empty.pb.dart';
 
@@ -28,16 +31,41 @@ class ResourceManager {
     return ResourceManager(storage, client, auth);
   }
 
+  Future<void> delete(ResourceId id) async {
+    final String key = id.display();
+    await _storage.storage.delete(key: key);
+  }
+
   Future<Resource> fetch(ResourceId id) async {
-    final String key = buildKey(id);
+    final String key = id.display();
     Resource? resource = await _read(key);
 
     if (resource == null) {
+      logger.i('Downloading resource ${id.display()}...');
+      resource = await _request(id);
+      await _write(key, resource);
+    } else if (await _hasChanged(id, resource)) {
+      logger.i('Resource ${id.display} has changed, re-downloading...');
       resource = await _request(id);
       await _write(key, resource);
     }
 
     return resource;
+  }
+
+  Future<bool> _hasChanged(ResourceId id, Resource resource) async {
+    final MetaResponse metaResponse = await _client.resourceService.meta(
+      MetaRequest(resourceId: <ResourceId>[id]),
+      options: _auth.buildOptions(),
+    );
+
+    if (metaResponse.hasError()) {
+      throw ServiceException(metaResponse.error);
+    }
+
+    final ResourceMeta meta = metaResponse.metas[0];
+
+    return meta.timestamp.seconds != resource.meta.timestamp.seconds;
   }
 
   Future<Resource?> _read(String key) async {
@@ -65,27 +93,24 @@ class ResourceManager {
       options: _auth.buildOptions(),
     );
 
-    late Uint8List data;
     late ResourceMeta meta;
-    int offset = 0;
+    final BytesBuilder byteBuilder = BytesBuilder();
 
     await for (final DownloadResponse response in stream) {
       if (response.hasMeta()) {
         meta = response.meta;
-        data = Uint8List(response.meta.size);
         continue;
       }
 
-      final List<int> chunk = response.data;
+      if (response.hasError()) {
+        throw ServiceException(response.error);
+      }
 
-      data.setRange(offset, offset + chunk.length, chunk);
-      offset += chunk.length;
+      byteBuilder.add(response.data);
     }
 
-    return Resource(meta, data);
+    return Resource(meta, byteBuilder.takeBytes());
   }
-
-  static String buildKey(ResourceId id) => 'resource:$id';
 }
 
 class Resource {

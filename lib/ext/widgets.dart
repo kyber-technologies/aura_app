@@ -82,6 +82,26 @@ extension TextExt on Text {
     selectionColor: selectionColor,
   );
 
+  Widget contentBox(
+    BuildContext context, {
+    Color? backgroundColor,
+    EdgeInsetsGeometry? padding,
+    BorderRadiusGeometry? borderRadius,
+    BoxBorder? border,
+  }) {
+    final ThemeData theme = Theme.of(context);
+
+    return Container(
+      padding: padding ?? const EdgeInsets.all(8),
+      decoration: BoxDecoration(
+        color: backgroundColor ?? theme.colorScheme.surfaceContainerHigh,
+        borderRadius: borderRadius ?? BorderRadius.circular(12),
+        border: border,
+      ),
+      child: this,
+    );
+  }
+
   Text headlineSmall(BuildContext context) {
     final ThemeData theme = Theme.of(context);
 
@@ -878,4 +898,14 @@ extension RTextExt on RText {
       selectionColor: selectionColor,
     );
   }
+}
+
+extension DialogExtension on Dialog {
+  Future<T?> show<T>(BuildContext context) async =>
+      showDialog<T?>(context: context, builder: (BuildContext context) => this);
+}
+
+extension AlertDialogExtension on AlertDialog {
+  Future<T?> show<T>(BuildContext context) async =>
+      showDialog<T?>(context: context, builder: (BuildContext context) => this);
 }

@@ -41,6 +41,19 @@ class ProfilePage extends HookConsumerWidget {
                         fontWeight: FontWeight.bold,
                       )
                       .copyable(auth.user.userId),
+                  const SizedBox(height: 10),
+                  Text(
+                        auth.user.about.isEmpty
+                            ? context.l10n.noAbout
+                            : auth.user.about,
+                      )
+                      .title(context)
+                      .copyWithStyle(
+                        color: Theme.of(context).colorScheme.tertiary,
+                        fontWeight: FontWeight.w300,
+                      )
+                      .contentBox(context)
+                      .selectable(),
                   const SizedBox(height: 15),
                   FilledButton.icon(
                     onPressed: () {

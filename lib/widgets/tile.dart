@@ -40,6 +40,7 @@ class Tile extends StatelessWidget {
               flex: 3,
               child: Align(alignment: Alignment.centerRight, child: content),
             ),
+            if (spacing != null) SizedBox(width: spacing),
           ],
         ),
       ),

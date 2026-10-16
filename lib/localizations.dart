@@ -160,6 +160,18 @@ abstract class AppLocalizations {
   /// **'Please enter a valid email address'**
   String get emailInvalid;
 
+  /// No description provided for @noEmailTokenInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter your email token'**
+  String get noEmailTokenInvalid;
+
+  /// No description provided for @emailTokenInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid email token. Please try again.'**
+  String get emailTokenInvalid;
+
   /// No description provided for @password.
   ///
   /// In en, this message translates to:
@@ -292,6 +304,96 @@ abstract class AppLocalizations {
   /// **'Submit'**
   String get submit;
 
+  /// No description provided for @upload.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload'**
+  String get upload;
+
+  /// No description provided for @cancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get cancel;
+
+  /// No description provided for @noAbout.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing about you... yet?'**
+  String get noAbout;
+
+  /// No description provided for @profile.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile'**
+  String get profile;
+
+  /// No description provided for @profileUsername.
+  ///
+  /// In en, this message translates to:
+  /// **'Your Username'**
+  String get profileUsername;
+
+  /// No description provided for @newProfileUsername.
+  ///
+  /// In en, this message translates to:
+  /// **'Your new Username'**
+  String get newProfileUsername;
+
+  /// No description provided for @profileUsernameDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit your Username.'**
+  String get profileUsernameDesc;
+
+  /// No description provided for @profileAbout.
+  ///
+  /// In en, this message translates to:
+  /// **'About You'**
+  String get profileAbout;
+
+  /// No description provided for @newProfileAbout.
+  ///
+  /// In en, this message translates to:
+  /// **'Your new About You'**
+  String get newProfileAbout;
+
+  /// No description provided for @profileAboutDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit your About You.'**
+  String get profileAboutDesc;
+
+  /// No description provided for @profileEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Your Email'**
+  String get profileEmail;
+
+  /// No description provided for @newProfileEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Your new Email'**
+  String get newProfileEmail;
+
+  /// No description provided for @profileEmailDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit your Email.'**
+  String get profileEmailDesc;
+
+  /// No description provided for @profileIcon.
+  ///
+  /// In en, this message translates to:
+  /// **'Your Profile Icon'**
+  String get profileIcon;
+
+  /// No description provided for @profileIconDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit your Profile Icon.'**
+  String get profileIconDesc;
+
   /// No description provided for @general.
   ///
   /// In en, this message translates to:
@@ -307,7 +409,7 @@ abstract class AppLocalizations {
   /// No description provided for @allowInvitesDesc.
   ///
   /// In en, this message translates to:
-  /// **'Allow invites and DMs from other users.'**
+  /// **'Allow invites and DMs from other Users.'**
   String get allowInvitesDesc;
 
   /// No description provided for @appearance.
@@ -325,7 +427,7 @@ abstract class AppLocalizations {
   /// No description provided for @darkModeDesc.
   ///
   /// In en, this message translates to:
-  /// **'Toggle dark mode theme.'**
+  /// **'Toggle Dark Mode Theme.'**
   String get darkModeDesc;
 
   /// No description provided for @animations.
@@ -355,7 +457,7 @@ abstract class AppLocalizations {
   /// No description provided for @notifyInvitesDesc.
   ///
   /// In en, this message translates to:
-  /// **'Enable notifications for invites.'**
+  /// **'Enable Notifications for invites.'**
   String get notifyInvitesDesc;
 
   /// No description provided for @notifyMessages.
@@ -367,7 +469,7 @@ abstract class AppLocalizations {
   /// No description provided for @notifyMessagesDesc.
   ///
   /// In en, this message translates to:
-  /// **'Enable notifications for direct messages.'**
+  /// **'Enable Notifications for direct messages.'**
   String get notifyMessagesDesc;
 
   /// No description provided for @notifyComments.
@@ -379,7 +481,7 @@ abstract class AppLocalizations {
   /// No description provided for @notifyCommentsDesc.
   ///
   /// In en, this message translates to:
-  /// **'Enable notifications for comments on your posts.'**
+  /// **'Enable Notifications for Comments on your Posts.'**
   String get notifyCommentsDesc;
 
   /// No description provided for @algorithm.
@@ -397,7 +499,7 @@ abstract class AppLocalizations {
   /// No description provided for @algoLikeWeightDesc.
   ///
   /// In en, this message translates to:
-  /// **'Weight of likes in the algorithm. Higher values can get you into filter bubbles.'**
+  /// **'Weight of Likes in the Algorithm. Higher values can get you into filter bubbles.'**
   String get algoLikeWeightDesc;
 
   /// No description provided for @algoDislikeWeight.
@@ -409,7 +511,7 @@ abstract class AppLocalizations {
   /// No description provided for @algoDislikeWeightDesc.
   ///
   /// In en, this message translates to:
-  /// **'Weight of dislikes in the algorithm. Lower values can get you into filter bubbles.'**
+  /// **'Weight of Dislikes in the Algorithm. Lower values can get you into filter bubbles.'**
   String get algoDislikeWeightDesc;
 
   /// No description provided for @algoCommentWeight.
@@ -421,7 +523,7 @@ abstract class AppLocalizations {
   /// No description provided for @algoCommentWeightDesc.
   ///
   /// In en, this message translates to:
-  /// **'Weight of comments in the algorithm. Higher values can recommend you rage-bait posts.'**
+  /// **'Weight of Comments in the Algorithm. Higher values can recommend you rage-bait Posts.'**
   String get algoCommentWeightDesc;
 
   /// No description provided for @algoTimeDecay.
@@ -433,7 +535,7 @@ abstract class AppLocalizations {
   /// No description provided for @algoTimeDecayDesc.
   ///
   /// In en, this message translates to:
-  /// **'Time weight decay of posts. Higher values will give you more recent posts.'**
+  /// **'Time weight decay of Posts. Higher values will give you more recent Posts.'**
   String get algoTimeDecayDesc;
 
   /// No description provided for @resetAlgo.
@@ -451,8 +553,14 @@ abstract class AppLocalizations {
   /// No description provided for @resetAlgoConfirmBody.
   ///
   /// In en, this message translates to:
-  /// **'Are you sure you want to reset your algorithm? This action cannot be undone.'**
+  /// **'Are you sure you want to reset your Algorithm? This action cannot be undone.'**
   String get resetAlgoConfirmBody;
+
+  /// No description provided for @invalidUploadFormat.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid upload format: {format}'**
+  String invalidUploadFormat(Object format);
 }
 
 class _AppLocalizationsDelegate
