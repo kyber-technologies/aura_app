@@ -32,5 +32,5 @@ extension ResourceNamespaceExt on ResourceNamespace {
 }
 
 extension ResourceIdExt on ResourceId {
-  String display() => '$key${namespace.display()}';
+  String display() => '$key:${namespace.display()}';
 }

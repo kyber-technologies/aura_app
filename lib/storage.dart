@@ -7,6 +7,7 @@ import 'package:aura_app/info.dart';
 import 'package:aura_dart/user.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:synchronized/synchronized.dart';
 
 final UserSettings defaultUserSettings = UserSettings(
   resetAlgoTags: <String>[],
@@ -37,7 +38,8 @@ class StorageNotifier extends AsyncNotifier<Storage> {
 }
 
 class Storage {
-  final FlutterSecureStorage storage = FlutterSecureStorage(
+  final Lock _lock = Lock();
+  final FlutterSecureStorage _storage = FlutterSecureStorage(
     iOptions: IOSOptions(
       accountName: 'aura',
       label: packageInfo.packageName,
@@ -60,6 +62,7 @@ class Storage {
 
   late Settings settings;
   late ChatStorage chatStorage;
+
   AuthState? auth;
 
   static Future<Storage> load() async {
@@ -67,12 +70,12 @@ class Storage {
 
     // Load Settings
     {
-      final String? json = await storage.storage.read(key: 'settings');
+      final String? json = await storage._storage.read(key: 'settings');
 
       if (json == null) {
         final Settings defaultValue = Settings.defaultValue();
 
-        await storage.storage.write(
+        await storage._storage.write(
           key: 'settings',
           value: defaultValue.toJson(),
         );
@@ -85,12 +88,15 @@ class Storage {
 
     // Load Chats
     {
-      final String? json = await storage.storage.read(key: 'chats');
+      final String? json = await storage._storage.read(key: 'chats');
 
       if (json == null) {
         final ChatStorage defaultValue = ChatStorage.defaultValue();
 
-        await storage.storage.write(key: 'chats', value: defaultValue.toJson());
+        await storage._storage.write(
+          key: 'chats',
+          value: defaultValue.toJson(),
+        );
 
         storage.chatStorage = defaultValue;
       } else {
@@ -100,7 +106,7 @@ class Storage {
 
     // Load Auth State
     {
-      final String? json = await storage.storage.read(key: 'auth');
+      final String? json = await storage._storage.read(key: 'auth');
 
       if (json != null) {
         storage.auth = AuthState.fromJson(json);
@@ -111,19 +117,25 @@ class Storage {
   }
 
   Future<void> save() async {
-    // Save Settings
-    await storage.write(key: 'settings', value: settings.toJson());
+    await lock((FlutterSecureStorage storage) async {
+      // Save Settings
+      await storage.write(key: 'settings', value: settings.toJson());
 
-    // Save Chats
-    await storage.write(key: 'chats', value: chatStorage.toJson());
+      // Save Chats
+      await storage.write(key: 'chats', value: chatStorage.toJson());
 
-    // Save Auth State
-    if (auth != null) {
-      await storage.write(key: 'auth', value: auth!.toJson());
-    } else {
-      await storage.delete(key: 'auth');
-    }
+      // Save Auth State
+      if (auth != null) {
+        await storage.write(key: 'auth', value: auth!.toJson());
+      } else {
+        await storage.delete(key: 'auth');
+      }
+    });
   }
+
+  Future<T> lock<T>(
+    FutureOr<T> Function(FlutterSecureStorage storage) future,
+  ) => _lock.synchronized(() async => await future(_storage));
 }
 
 class ChatStorage {
