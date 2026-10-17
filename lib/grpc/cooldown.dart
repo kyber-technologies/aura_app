@@ -1,3 +1,4 @@
+import 'package:aura_app/logger.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 final Provider<CooldownProvider> cooldownProvider = Provider<CooldownProvider>(
@@ -13,7 +14,13 @@ class CooldownProvider {
     final DateTime? lastUse = _entries[action];
 
     if (lastUse != null) {
-      return lastUse.add(action.cooldown).isAfter(DateTime.now());
+      final bool cd = lastUse.add(action.cooldown).isAfter(DateTime.now());
+
+      if(cd) {
+        logger.i('$action on cooldown!');
+      }
+
+      return cd;
     } else {
       _entries[action] = DateTime.now();
 
@@ -28,7 +35,7 @@ enum Action {
   Duration get cooldown {
     switch (this) {
       case Action.resourceMeta:
-        return const Duration(seconds: 10);
+        return const Duration(seconds: 5);
     }
   }
 }
