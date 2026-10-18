@@ -92,7 +92,7 @@ class ProfilePage extends HookConsumerWidget {
                     icon: const Icon(Icons.logout),
                     label: const Text('Log Out'),
                   ),
-                  const SizedBox(height: 30),
+                  const SizedBox(height: 10),
                   FilledButton.icon(
                     onPressed: () {
                       showAboutDialog(

@@ -5,6 +5,7 @@ import 'package:aura_app/pages/feed.dart';
 import 'package:aura_app/pages/login.dart';
 import 'package:aura_app/pages/profile/profile.dart';
 import 'package:aura_app/pages/profile/settings.dart';
+import 'package:aura_app/pages/search.dart';
 import 'package:aura_app/pages/signup.dart';
 import 'package:aura_app/storage.dart';
 import 'package:flutter/material.dart';
@@ -15,6 +16,12 @@ const RouteDescriptor feedRoute = RouteDescriptor(
   path: '/',
   name: 'feed',
   page: FeedPage(),
+);
+
+const RouteDescriptor searchRoute = RouteDescriptor(
+  path: '/search',
+  name: 'search',
+  page: SearchPage(),
 );
 
 const RouteDescriptor chatRoute = RouteDescriptor(
@@ -64,6 +71,7 @@ final Provider<GoRouter> routerProvider = Provider<GoRouter>((Ref ref) {
     initialLocation: '/',
     routes: <GoRoute>[
       feedRoute.toRoute(ref, auth),
+      searchRoute.toRoute(ref, auth),
       chatRoute.toRoute(ref, auth),
       profileRoute.toRoute(ref, auth),
       settingsRoute.toRoute(ref, auth),

@@ -15,13 +15,15 @@ class Navbar extends HookConsumerWidget {
 
       if (routeName == feedRoute.name) {
         return 0;
-      } else if (routeName == chatRoute.name) {
+      } else if (routeName == searchRoute.name) {
         return 1;
+      } else if (routeName == chatRoute.name) {
+        return 2;
       } else if (routeName == profileRoute.name ||
           routeName == settingsRoute.name ||
           routeName == loginRoute.name ||
           routeName == signupRoute.name) {
-        return 2;
+        return 3;
       } else {
         return 0;
       }
@@ -34,6 +36,11 @@ class Navbar extends HookConsumerWidget {
           icon: Icon(Icons.signpost),
           label: 'Feed',
           tooltip: 'Go to your Feed',
+        ),
+        NavigationDestination(
+          icon: Icon(Icons.search),
+          label: 'Search',
+          tooltip: 'Go to the Search',
         ),
         NavigationDestination(
           icon: Icon(Icons.chat),
@@ -52,8 +59,10 @@ class Navbar extends HookConsumerWidget {
           case 0:
             context.goNamed(feedRoute.name);
           case 1:
-            context.goNamed(chatRoute.name);
+            context.goNamed(searchRoute.name);
           case 2:
+            context.goNamed(chatRoute.name);
+          case 3:
             context.goNamed(profileRoute.name);
           default:
             logger.e('Invalid destination: $index');
