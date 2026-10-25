@@ -3,6 +3,7 @@ import 'package:aura_app/logger.dart';
 import 'package:aura_app/pages/chat.dart';
 import 'package:aura_app/pages/feed.dart';
 import 'package:aura_app/pages/login.dart';
+import 'package:aura_app/pages/notifications.dart';
 import 'package:aura_app/pages/profile/profile.dart';
 import 'package:aura_app/pages/profile/settings.dart';
 import 'package:aura_app/pages/search.dart';
@@ -22,6 +23,12 @@ const RouteDescriptor searchRoute = RouteDescriptor(
   path: '/search',
   name: 'search',
   page: SearchPage(),
+);
+
+const RouteDescriptor notificationsRoute = RouteDescriptor(
+  path: '/notifications',
+  name: 'notifications',
+  page: NotificationsPage(),
 );
 
 const RouteDescriptor chatRoute = RouteDescriptor(
@@ -72,6 +79,7 @@ final Provider<GoRouter> routerProvider = Provider<GoRouter>((Ref ref) {
     routes: <GoRoute>[
       feedRoute.toRoute(ref, auth),
       searchRoute.toRoute(ref, auth),
+      notificationsRoute.toRoute(ref, auth),
       chatRoute.toRoute(ref, auth),
       profileRoute.toRoute(ref, auth),
       settingsRoute.toRoute(ref, auth),

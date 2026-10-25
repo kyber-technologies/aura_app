@@ -1,3 +1,4 @@
+import 'package:aura_app/ext/common.dart';
 import 'package:aura_app/logger.dart';
 import 'package:aura_app/router.dart';
 import 'package:flutter/material.dart';
@@ -17,13 +18,15 @@ class Navbar extends HookConsumerWidget {
         return 0;
       } else if (routeName == searchRoute.name) {
         return 1;
-      } else if (routeName == chatRoute.name) {
+      } else if (routeName == notificationsRoute.name) {
         return 2;
+      } else if (routeName == chatRoute.name) {
+        return 3;
       } else if (routeName == profileRoute.name ||
           routeName == settingsRoute.name ||
           routeName == loginRoute.name ||
           routeName == signupRoute.name) {
-        return 3;
+        return 4;
       } else {
         return 0;
       }
@@ -31,26 +34,26 @@ class Navbar extends HookConsumerWidget {
 
     return NavigationBar(
       selectedIndex: selected,
-      destinations: const <NavigationDestination>[
+      destinations: <NavigationDestination>[
         NavigationDestination(
-          icon: Icon(Icons.signpost),
-          label: 'Feed',
-          tooltip: 'Go to your Feed',
+          icon: const Icon(Icons.signpost),
+          label: context.l10n.feed,
         ),
         NavigationDestination(
-          icon: Icon(Icons.search),
-          label: 'Search',
-          tooltip: 'Go to the Search',
+          icon: const Icon(Icons.search),
+          label: context.l10n.search,
         ),
         NavigationDestination(
-          icon: Icon(Icons.chat),
-          label: 'Chat',
-          tooltip: 'Open Chats',
+          icon: const Icon(Icons.notifications),
+          label: context.l10n.notifications,
         ),
         NavigationDestination(
-          icon: Icon(Icons.person),
-          label: 'Profile',
-          tooltip: 'Open Profile',
+          icon: const Icon(Icons.chat),
+          label: context.l10n.chat,
+        ),
+        NavigationDestination(
+          icon: const Icon(Icons.person),
+          label: context.l10n.profile,
         ),
       ],
 
@@ -61,8 +64,10 @@ class Navbar extends HookConsumerWidget {
           case 1:
             context.goNamed(searchRoute.name);
           case 2:
-            context.goNamed(chatRoute.name);
+            context.goNamed(notificationsRoute.name);
           case 3:
+            context.goNamed(chatRoute.name);
+          case 4:
             context.goNamed(profileRoute.name);
           default:
             logger.e('Invalid destination: $index');

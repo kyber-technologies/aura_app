@@ -9,6 +9,21 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
+  String get feed => 'Feed';
+
+  @override
+  String get search => 'Search';
+
+  @override
+  String get notifications => 'Notifications';
+
+  @override
+  String get chat => 'Chat';
+
+  @override
+  String get profile => 'Profile';
+
+  @override
   String get copiedToClipboard => 'Copied to Clipboard';
 
   @override
@@ -128,9 +143,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noAbout => 'Nothing about you... yet?';
 
   @override
-  String get profile => 'Profile';
-
-  @override
   String get profileUsername => 'Your Username';
 
   @override
@@ -186,9 +198,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get animationsDesc => 'Enable animations.';
-
-  @override
-  String get notifications => 'Notifications';
 
   @override
   String get notifyInvites => 'Notify for Invites';

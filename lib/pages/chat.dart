@@ -66,7 +66,7 @@ class ChatPage extends HookConsumerWidget {
                               .read(
                                 ReadRequest(
                                   channelId: chat.channel.channelId,
-                                  limit: maximumCachedMessages,
+                                  limit: requestChatLimit,
                                   startTime: startAt,
                                 ),
                               );

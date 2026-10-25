@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:aura_app/chat.dart';
 import 'package:aura_app/grpc/auth.dart';
+import 'package:aura_app/grpc/notifications.dart';
 import 'package:aura_app/info.dart';
 import 'package:aura_dart/user.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -62,6 +63,7 @@ class Storage {
 
   late Settings settings;
   late ChatStorage chatStorage;
+  late NotificationStorage notificationStorage;
 
   AuthState? auth;
 
@@ -77,12 +79,14 @@ class Storage {
 
         await storage._storage.write(
           key: 'settings',
-          value: defaultValue.toJson(),
+          value: jsonEncode(defaultValue.toJson()),
         );
 
         storage.settings = defaultValue;
       } else {
-        storage.settings = Settings.fromJson(json);
+        storage.settings = Settings.fromJson(
+          jsonDecode(json) as Map<String, dynamic>,
+        );
       }
     }
 
@@ -95,12 +99,35 @@ class Storage {
 
         await storage._storage.write(
           key: 'chats',
-          value: defaultValue.toJson(),
+          value: jsonEncode(defaultValue.toJson()),
         );
 
         storage.chatStorage = defaultValue;
       } else {
-        storage.chatStorage = ChatStorage.fromJson(json);
+        storage.chatStorage = ChatStorage.fromJson(
+          jsonDecode(json) as Map<String, dynamic>,
+        );
+      }
+    }
+
+    // Load Notifications
+    {
+      final String? json = await storage._storage.read(key: 'notifications');
+
+      if (json == null) {
+        final NotificationStorage defaultValue =
+            NotificationStorage.defaultValue();
+
+        await storage._storage.write(
+          key: 'notifications',
+          value: jsonEncode(defaultValue.toJson()),
+        );
+
+        storage.notificationStorage = defaultValue;
+      } else {
+        storage.notificationStorage = NotificationStorage.fromJson(
+          jsonDecode(json) as Map<String, dynamic>,
+        );
       }
     }
 
@@ -109,7 +136,9 @@ class Storage {
       final String? json = await storage._storage.read(key: 'auth');
 
       if (json != null) {
-        storage.auth = AuthState.fromJson(json);
+        storage.auth = AuthState.fromJson(
+          jsonDecode(json) as Map<String, dynamic>,
+        );
       }
     }
 
@@ -119,14 +148,26 @@ class Storage {
   Future<void> save() async {
     await lock((FlutterSecureStorage storage) async {
       // Save Settings
-      await storage.write(key: 'settings', value: settings.toJson());
+      await storage.write(
+        key: 'settings',
+        value: jsonEncode(settings.toJson()),
+      );
 
       // Save Chats
-      await storage.write(key: 'chats', value: chatStorage.toJson());
+      await storage.write(
+        key: 'chats',
+        value: jsonEncode(chatStorage.toJson()),
+      );
+
+      // Save Notifications
+      await storage.write(
+        key: 'notifications',
+        value: jsonEncode(notificationStorage.toJson()),
+      );
 
       // Save Auth State
       if (auth != null) {
-        await storage.write(key: 'auth', value: auth!.toJson());
+        await storage.write(key: 'auth', value: jsonEncode(auth!.toJson()));
       } else {
         await storage.delete(key: 'auth');
       }
@@ -138,38 +179,6 @@ class Storage {
   ) => _lock.synchronized(() async => await future(_storage));
 }
 
-class ChatStorage {
-  Map<String, Chat> chats;
-
-  static ChatStorage defaultValue() => ChatStorage(<String, Chat>{});
-
-  ChatStorage(this.chats);
-
-  static ChatStorage fromJson(String json) {
-    final Map<String, dynamic> map = jsonDecode(json) as Map<String, dynamic>;
-
-    final Iterable<MapEntry<String, Chat>> chats = map.entries.map(
-      (MapEntry<String, dynamic> entry) => MapEntry<String, Chat>(
-        entry.key,
-        Chat.fromJson(entry.value as String),
-      ),
-    );
-
-    return ChatStorage(Map<String, Chat>.fromEntries(chats));
-  }
-
-  String toJson() {
-    final Map<String, String> map = Map<String, String>.fromEntries(
-      chats.entries.map(
-        (MapEntry<String, Chat> entry) =>
-            MapEntry<String, String>(entry.key, entry.value.toJson()),
-      ),
-    );
-
-    return jsonEncode(map);
-  }
-}
-
 class Settings {
   bool darkMode;
   bool animations;
@@ -178,19 +187,15 @@ class Settings {
 
   Settings({required this.darkMode, required this.animations});
 
-  static Settings fromJson(String json) {
-    final Map<String, dynamic> map = jsonDecode(json) as Map<String, dynamic>;
+  static Settings fromJson(Map<String, dynamic> json) => Settings(
+    darkMode: bool.parse(json['darkMode']! as String),
+    animations: bool.parse(json['animations']! as String),
+  );
 
-    return Settings(
-      darkMode: bool.parse(map['darkMode']! as String),
-      animations: bool.parse(map['animations']! as String),
-    );
-  }
-
-  String toJson() => jsonEncode(<String, String>{
+  Map<String, dynamic> toJson() => <String, String>{
     'darkMode': darkMode.toString(),
     'animations': animations.toString(),
-  });
+  };
 
   bool isDirty({bool? darkMode, bool? animations}) =>
       this.darkMode != (darkMode ?? this.darkMode) ||

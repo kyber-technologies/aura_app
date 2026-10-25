@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:aura_app/grpc/client.dart';
 import 'package:aura_app/grpc/exception.dart';
 import 'package:aura_app/storage.dart';
@@ -109,15 +107,13 @@ class AuthState {
 
   AuthState({required this.token, required this.user});
 
-  static AuthState fromJson(String json) {
-    final Map<String, dynamic> map = jsonDecode(json) as Map<String, dynamic>;
+  static AuthState fromJson(Map<String, dynamic> json) => AuthState(
+    token: json['token'] as String,
+    user: User.fromJson(json['user'] as String),
+  );
 
-    return AuthState(
-      token: map['token'] as String,
-      user: User.fromJson(map['user'] as String),
-    );
-  }
-
-  String toJson() =>
-      jsonEncode(<String, String>{'token': token, 'user': user.writeToJson()});
+  Map<String, dynamic> toJson() => <String, String>{
+    'token': token,
+    'user': user.writeToJson(),
+  };
 }
